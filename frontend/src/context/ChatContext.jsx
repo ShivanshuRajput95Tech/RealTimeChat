@@ -2,6 +2,7 @@ import { createContext, useContext, useState, useEffect } from "react";
 import toast from "react-hot-toast";
 import { AuthContext } from "./AuthContext";
 
+export const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
 
@@ -15,57 +16,77 @@ export const ChatProvider = ({ children }) => {
 
   // LOAD USERS FOR SIDEBAR
   const getUsers = async () => {
+
     try {
 
       const { data } = await axios.get("/api/message/users");
 
       if (data.success) {
+
         setUsers(data.users);
         setUnseenMessages(data.unseenMessages);
+
       }
 
-    } catch (error) {
+    } catch {
+
       toast.error("Failed to load users");
+
     }
+
   };
 
 
   // LOAD CHAT MESSAGES
   const getMessages = async (userId) => {
+
     try {
 
       const { data } = await axios.get(`/api/message/${userId}`);
 
       if (data.success) {
+
         setMessages(data.messages);
+
+        // reset unseen count
+        setUnseenMessages(prev => ({
+          ...prev,
+          [userId]: 0
+        }));
+
       }
 
-    } catch (error) {
+    } catch {
+
       toast.error("Failed to load messages");
+
     }
+
   };
 
 
   // SEND MESSAGE
   const sendMessage = async (messageData) => {
+
     try {
 
       const { data } = await axios.post(
-        `/api/message/send/${selectedUser._id}`,
+        `/api/message/${selectedUser._id}`,
         messageData
       );
 
       if (data.success) {
 
-        setMessages((prev) => [...prev, data.message]);
-
-        socket?.emit("sendMessage", data.message);
+        setMessages(prev => [...prev, data.message]);
 
       }
 
-    } catch (error) {
+    } catch {
+
       toast.error("Failed to send message");
+
     }
+
   };
 
 
@@ -74,22 +95,21 @@ export const ChatProvider = ({ children }) => {
 
     if (!socket) return;
 
+    socket.off("newMessage");
+
     socket.on("newMessage", async (newMessage) => {
 
       if (selectedUser && newMessage.senderId === selectedUser._id) {
 
         newMessage.seen = true;
 
-        setMessages((prevMessages) => [
-          ...prevMessages,
-          newMessage
-        ]);
+        setMessages(prev => [...prev, newMessage]);
 
         await axios.put(`/api/message/mark/${newMessage._id}`);
 
       } else {
 
-        setUnseenMessages((prev) => ({
+        setUnseenMessages(prev => ({
           ...prev,
           [newMessage.senderId]: (prev[newMessage.senderId] || 0) + 1
         }));
@@ -101,17 +121,11 @@ export const ChatProvider = ({ children }) => {
   };
 
 
-  // UNSUBSCRIBE
-  const unsubscribeFromMessages = () => {
-    socket?.off("newMessage");
-  };
-
-
   useEffect(() => {
 
     subscribeToMessages();
 
-    return () => unsubscribeFromMessages();
+    return () => socket?.off("newMessage");
 
   }, [socket, selectedUser]);
 

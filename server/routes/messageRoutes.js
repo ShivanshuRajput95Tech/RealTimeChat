@@ -7,11 +7,30 @@ import {
     sendMessage
 } from "../controllers/messageController.js";
 
-const messageRouter = express.Router();
+const router = express.Router();
 
-messageRouter.get("/users", protectRoute, getUsersForSidebar);
-messageRouter.get("/:id", protectRoute, getMessages);
-messageRouter.put("/mark/:id", protectRoute, markMessageAsSeen);
-messageRouter.post("/:id", protectRoute, sendMessage)
+/*
+   GET users for sidebar
+   /api/message/users
+*/
+router.get("/users", protectRoute, getUsersForSidebar);
 
-export default messageRouter;
+/*
+   Mark message as seen
+   /api/message/mark/:id
+*/
+router.put("/mark/:id", protectRoute, markMessageAsSeen);
+
+/*
+   Get chat messages with a user
+   /api/message/:id
+*/
+router.get("/:id", protectRoute, getMessages);
+
+/*
+   Send message to user
+   /api/message/:id
+*/
+router.post("/:id", protectRoute, sendMessage);
+
+export default router;

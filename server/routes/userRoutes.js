@@ -2,12 +2,18 @@ import express from "express";
 import { protectRoute } from "../middleware/auth.js";
 import { updateProfile, checkAuth } from "../controllers/userController.js";
 
-const userRouter = express.Router();
+const router = express.Router();
 
-// check if user is authenticated
-userRouter.get("/check", protectRoute, checkAuth);
+/*
+    GET /api/auth/check
+    Verify if user is authenticated
+*/
+router.get("/check", protectRoute, checkAuth);
 
-// update profile
-userRouter.put("/update-profile", protectRoute, updateProfile);
+/*
+    PUT /api/auth/update-profile
+    Update user profile
+*/
+router.put("/update-profile", protectRoute, updateProfile);
 
-export default userRouter;
+export default router;

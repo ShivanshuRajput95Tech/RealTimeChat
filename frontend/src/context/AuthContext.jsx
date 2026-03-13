@@ -22,41 +22,49 @@ export const AuthProvider = ({ children }) => {
 
     if (!userData || socket?.connected) return;
 
-    const newSocket = io(backendUrl, {
-      query: {
-        userId: userData._id
-      }
-    });
+    const newSocket = io(backendUrl);
 
     newSocket.connect();
+
+    // register user on server
+    newSocket.emit("add-user", userData._id);
 
     setSocket(newSocket);
 
     newSocket.on("getOnlineUsers", (userIds) => {
       setOnlineUsers(userIds);
     });
+
   };
 
 
   // CHECK AUTH
   const checkAuth = async () => {
+
     try {
 
       const { data } = await axios.get("/api/auth/check");
 
       if (data.success) {
+
         setAuthUser(data.userData);
+
         connectSocket(data.userData);
+
       }
 
     } catch (error) {
+
       console.log(error.message);
+
     }
+
   };
 
 
   // LOGIN / SIGNUP
   const login = async (state, credentials) => {
+
     try {
 
       const { data } = await axios.post(`/api/auth/${state}`, credentials);
@@ -65,13 +73,13 @@ export const AuthProvider = ({ children }) => {
 
         setAuthUser(data.userData);
 
-        connectSocket(data.userData);
-
-        axios.defaults.headers.common["token"] = data.token;
-
         setToken(data.token);
 
         localStorage.setItem("token", data.token);
+
+        axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+
+        connectSocket(data.userData);
 
         toast.success(data.message);
 
@@ -88,6 +96,7 @@ export const AuthProvider = ({ children }) => {
       );
 
     }
+
   };
 
 
@@ -102,9 +111,10 @@ export const AuthProvider = ({ children }) => {
 
     socket?.disconnect();
 
-    axios.defaults.headers.common["token"] = null;
+    delete axios.defaults.headers.common["Authorization"];
 
     toast.success("Logged out successfully");
+
   };
 
 
@@ -113,17 +123,24 @@ export const AuthProvider = ({ children }) => {
 
     try {
 
-      const { data } = await axios.put("/api/auth/updateProfile", body);
+      const { data } = await axios.put("/api/auth/update-profile", body);
 
       if (data.success) {
+
         setAuthUser(data.userData);
-        toast.success(data.message);
+
+        toast.success("Profile updated");
+
       } else {
+
         toast.error(data.message);
+
       }
 
     } catch (error) {
+
       toast.error(error.message);
+
     }
 
   };
@@ -133,8 +150,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
 
     if (token) {
-      axios.defaults.headers.common["token"] = token;
+
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+
       checkAuth();
+
     }
 
   }, []);

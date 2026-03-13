@@ -1,19 +1,16 @@
 import mongoose from "mongoose";
-import dotenv from "dotenv";
 
-dotenv.config();
-
-// Function to connect to the database
 export const connectDB = async() => {
     try {
 
-        mongoose.connection.on("connected", () => {
-            console.log("Connected to the database");
-        });
+        const conn = await mongoose.connect(process.env.MONGODB_URI);
 
-        await mongoose.connect(`${process.env.MONGODB_URI}/chatapp`);
+        console.log(`MongoDB Connected: ${conn.connection.host}`);
 
     } catch (error) {
-        console.log("Database connection error:", error);
+
+        console.error("MongoDB connection failed:", error.message);
+        process.exit(1);
+
     }
 };

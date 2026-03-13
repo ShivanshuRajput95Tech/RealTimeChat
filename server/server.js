@@ -11,52 +11,67 @@ import messageRouter from "./routes/messageRoutes.js";
 const app = express();
 const server = http.createServer(app);
 
-// Socket.IO
+// ---------------- SOCKET.IO ----------------
 export const io = new Server(server, {
     cors: {
-        origin: "*",
-    },
+        origin: process.env.CLIENT_URL || "*",
+        methods: ["GET", "POST"]
+    }
 });
 
 // store online users
-export const userSocketMap = {};
+export const userSocketMap = new Map();
 
 io.on("connection", (socket) => {
+    console.log("User connected:", socket.id);
 
     socket.on("add-user", (userId) => {
-        userSocketMap[userId] = socket.id;
+        userSocketMap.set(userId, socket.id);
+        socket.userId = userId;
     });
 
     socket.on("disconnect", () => {
-        Object.keys(userSocketMap).forEach((userId) => {
-            if (userSocketMap[userId] === socket.id) {
-                delete userSocketMap[userId];
-            }
-        });
+        if (socket.userId) {
+            userSocketMap.delete(socket.userId);
+        }
+        console.log("User disconnected:", socket.id);
     });
-
 });
 
-// Middleware
-app.use(cors());
+// ---------------- MIDDLEWARE ----------------
+app.use(cors({
+    origin: process.env.CLIENT_URL || "*",
+    credentials: true
+}));
+
 app.use(express.json({ limit: "4mb" }));
 app.use(express.urlencoded({ extended: true }));
 
-// Routes
+// ---------------- ROUTES ----------------
 app.get("/api/status", (req, res) => {
-    res.send("Server is live");
+    res.json({
+        success: true,
+        message: "Server is running"
+    });
 });
 
 app.use("/api/auth", userRouter);
 app.use("/api/message", messageRouter);
 
-// Database
-await connectDB();
+// ---------------- DATABASE ----------------
+try {
+    await connectDB();
+    console.log("Database connected");
+} catch (error) {
+    console.error("Database connection failed:", error);
+    process.exit(1);
+}
 
+// ---------------- SERVER ----------------
 const PORT = process.env.PORT || 5000;
-if (process.env.NODE_ENV === "production") {
-    const PORT = process.env.PORT || 5000;
-    server.listen(PORT, () => {
-                console.log(` Server running on port ${PORT}`);
-            }
-            export default server;
+
+server.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
+
+export default server;

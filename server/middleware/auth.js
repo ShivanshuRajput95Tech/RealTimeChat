@@ -4,18 +4,29 @@ import jwt from "jsonwebtoken";
 export const protectRoute = async(req, res, next) => {
     try {
 
-        const token = req.headers.authorization;
+        const authHeader = req.headers.authorization;
 
-        if (!token) {
-            return res.json({ success: false, message: "Not authorized" });
+        if (!authHeader) {
+            return res.status(401).json({
+                success: false,
+                message: "No token provided"
+            });
         }
+
+        // Expect format: Bearer TOKEN
+        const token = authHeader.startsWith("Bearer ") ?
+            authHeader.split(" ")[1] :
+            authHeader;
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
         const user = await User.findById(decoded.userId).select("-password");
 
         if (!user) {
-            return res.json({ success: false, message: "User not found" });
+            return res.status(404).json({
+                success: false,
+                message: "User not found"
+            });
         }
 
         req.user = user;
@@ -23,7 +34,13 @@ export const protectRoute = async(req, res, next) => {
         next();
 
     } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: "Invalid token" });
+
+        console.error("Auth middleware error:", error.message);
+
+        return res.status(401).json({
+            success: false,
+            message: "Invalid or expired token"
+        });
+
     }
 };
