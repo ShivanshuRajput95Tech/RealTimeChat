@@ -14,15 +14,15 @@ const server = http.createServer(app);
 // ---------------- SOCKET.IO ----------------
 export const io = new Server(server, {
     cors: {
-        origin: process.env.CLIENT_URL || "*",
+        origin: process.env.CLIENT_URL,
         methods: ["GET", "POST"]
     }
 });
 
-// store online users
 export const userSocketMap = new Map();
 
 io.on("connection", (socket) => {
+
     console.log("User connected:", socket.id);
 
     socket.on("add-user", (userId) => {
@@ -36,15 +36,16 @@ io.on("connection", (socket) => {
         }
         console.log("User disconnected:", socket.id);
     });
+
 });
 
 // ---------------- MIDDLEWARE ----------------
 app.use(cors({
-    origin: process.env.CLIENT_URL || "*",
+    origin: process.env.CLIENT_URL,
     credentials: true
 }));
 
-app.use(express.json({ limit: "4mb" }));
+app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true }));
 
 // ---------------- ROUTES ----------------
@@ -58,20 +59,28 @@ app.get("/api/status", (req, res) => {
 app.use("/api/auth", userRouter);
 app.use("/api/message", messageRouter);
 
-// ---------------- DATABASE ----------------
-try {
-    await connectDB();
-    console.log("Database connected");
-} catch (error) {
-    console.error("Database connection failed:", error);
-    process.exit(1);
-}
-
-// ---------------- SERVER ----------------
+// ---------------- SERVER START ----------------
 const PORT = process.env.PORT || 5000;
 
-server.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`);
-});
+const startServer = async() => {
+
+    try {
+
+        await connectDB();
+
+        server.listen(PORT, () => {
+            console.log(`Server running on port ${PORT}`);
+        });
+
+    } catch (error) {
+
+        console.error("Failed to start server:", error);
+        process.exit(1);
+
+    }
+
+};
+
+startServer();
 
 export default server;

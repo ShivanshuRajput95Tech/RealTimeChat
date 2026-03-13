@@ -9,28 +9,16 @@ import {
 
 const router = express.Router();
 
-/*
-   GET users for sidebar
-   /api/message/users
-*/
+// Get users for sidebar
 router.get("/users", protectRoute, getUsersForSidebar);
 
-/*
-   Mark message as seen
-   /api/message/mark/:id
-*/
+// Mark message as seen
 router.put("/mark/:id", protectRoute, markMessageAsSeen);
 
-/*
-   Get chat messages with a user
-   /api/message/:id
-*/
+// Get messages with a user
 router.get("/:id", protectRoute, getMessages);
 
-/*
-   Send message to user
-   /api/message/:id
-*/
-router.post("/:id", protectRoute, sendMessage);
+// Send message
+router.post("/send/:id", protectRoute, sendMessage);
 
 export default router;
