@@ -66,100 +66,105 @@ const ChatContainer = () => {
   }
 
   return (
-    <div className="h-full flex flex-col relative backdrop-blur-lg">
+    <div className="h-full flex flex-col relative bg-white/5 backdrop-blur-[16px]">
 
       {/* HEADER */}
-      <div className="flex items-center gap-3 py-4 px-4 border-b border-stone-500">
+      <div className="flex items-center justify-between gap-3 p-4 border-b border-white/10">
+        <div className="flex items-center gap-3">
+          <img
+            src={selectedUser.profilePic || assets.avatar_icon}
+            className="w-11 h-11 rounded-2xl border border-white/20"
+          />
 
-        <img
-          src={selectedUser.profilePic || assets.avatar_icon}
-          className="w-8 rounded-full"
-        />
+          <div>
+            <p className="text-base font-semibold text-white">
+              {selectedUser.fullName}
+            </p>
+            <p className="text-xs text-white/60">
+              {onlineUsers.includes(selectedUser._id) ? "Online" : "Offline"}
+            </p>
+          </div>
+        </div>
 
-        <p className="flex-1 text-lg text-white flex items-center gap-2">
-          {selectedUser.fullName}
-
-          {onlineUsers.includes(selectedUser._id) && (
-            <span className="w-2 h-2 rounded-full bg-green-500"></span>
-          )}
-        </p>
-
-        <img
+        <button
+          type="button"
           onClick={() => setSelectedUser(null)}
-          src={assets.arrow_icon}
-          className="cursor-pointer w-6"
-        />
-
+          className="hidden md:flex items-center gap-2 px-3 py-2 rounded-full bg-white/10 hover:bg-white/15 transition"
+        >
+          <img src={assets.arrow_icon} className="w-4" />
+          <span className="text-xs text-white/80">Back</span>
+        </button>
       </div>
 
-
       {/* MESSAGES */}
-      <div className="flex-1 flex flex-col gap-3 overflow-y-auto p-4 pb-24">
+      <div className="flex-1 flex flex-col gap-4 overflow-y-auto px-5 py-6">
+        {messages.length === 0 && (
+          <div className="flex-1 flex flex-col items-center justify-center gap-3 text-center text-white/60">
+            <img src={assets.help_icon} alt="No messages" className="w-20 opacity-80" />
+            <p className="text-sm">No messages yet. Select a contact to start chatting.</p>
+          </div>
+        )}
 
         {messages.map((msg, index) => {
-
           const isOwnMessage = msg.senderId === authUser._id;
 
           return (
             <div
               key={index}
-              className={`flex items-end gap-2 ${
+              className={`flex gap-3 items-end ${
                 isOwnMessage ? "justify-end" : "justify-start"
               }`}
             >
-
               {!isOwnMessage && (
                 <img
                   src={selectedUser.profilePic || assets.avatar_icon}
-                  className="w-7 h-7 rounded-full"
+                  className="w-8 h-8 rounded-full border border-white/20"
                 />
               )}
 
-              {msg.image ? (
-                <img
-                  src={msg.image}
-                  className="max-w-[230px] rounded-lg border border-gray-700"
-                />
-              ) : (
-                <p
-                  className={`p-2 max-w-[220px] text-sm rounded-lg text-white
-                  ${
-                    isOwnMessage
-                      ? "bg-violet-500/30 rounded-br-none"
-                      : "bg-[#2b264a] rounded-bl-none"
-                  }`}
+              <div className="max-w-[78%]">
+                <div
+                  className={`relative rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm
+                    ${
+                      isOwnMessage
+                        ? "bg-gradient-to-br from-violet-500/30 to-indigo-500/20 text-white"
+                        : "bg-white/10 text-white"
+                    }`}
                 >
-                  {msg.text}
-                </p>
-              )}
+                  {msg.image ? (
+                    <img
+                      src={msg.image}
+                      alt="uploaded"
+                      className="rounded-xl border border-white/10 max-w-full object-cover"
+                    />
+                  ) : (
+                    <p className="whitespace-pre-wrap">{msg.text}</p>
+                  )}
 
-              <p className="text-xs text-gray-400">
-                {formateMessageTime(msg.createdAt)}
-              </p>
-
+                  <span className="absolute bottom-1 right-3 text-[10px] text-white/60">
+                    {formateMessageTime(msg.createdAt)}
+                  </span>
+                </div>
+              </div>
             </div>
           );
         })}
 
         <div ref={scrollEnd}></div>
-
       </div>
-
 
       {/* INPUT */}
       <form
         onSubmit={handleSendMessage}
-        className="absolute bottom-0 left-0 right-0 flex items-center gap-3 p-3 bg-[#1f1b2e]"
+        className="absolute bottom-0 left-0 right-0 flex items-center gap-3 px-4 py-4 bg-gradient-to-t from-slate-950/90 via-slate-950/70 to-transparent"
       >
-
-        <div className="flex-1 flex items-center bg-gray-100/10 px-3 rounded-full">
-
+        <div className="flex-1 flex items-center gap-3 rounded-full bg-white/10 px-4 py-3">
           <input
             value={input}
             onChange={(e) => setInput(e.target.value)}
             type="text"
-            placeholder="Send a message..."
-            className="flex-1 text-sm p-3 bg-transparent outline-none text-white"
+            placeholder="Type a message..."
+            className="flex-1 text-sm bg-transparent outline-none text-white placeholder-white/50"
           />
 
           <input
@@ -170,18 +175,18 @@ const ChatContainer = () => {
             onChange={handleSendImage}
           />
 
-          <label htmlFor="image">
-            <img src={assets.gallery_icon} className="w-5 mr-2 cursor-pointer" />
+          <label htmlFor="image" className="cursor-pointer">
+            <img src={assets.gallery_icon} className="w-5 text-white/70 hover:text-white" />
           </label>
-
         </div>
 
-        <button type="submit">
-          <img src={assets.send_button} className="w-7 cursor-pointer" />
+        <button
+          type="submit"
+          className="h-11 w-11 rounded-full bg-violet-500 hover:bg-violet-400 transition shadow-lg flex items-center justify-center"
+        >
+          <img src={assets.send_button} className="w-5" />
         </button>
-
       </form>
-
     </div>
   );
 };
