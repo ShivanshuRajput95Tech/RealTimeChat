@@ -9,20 +9,21 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [bio, setBio] = useState("");
-  const [isDataSubmitted, setIsDataSubmitted] = useState(false);
 
-  const {login} = useContext(AuthContext)
+  const { login, isLoading } = useContext(AuthContext);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const onSubmitHandler = (event) => {
+  const onSubmitHandler = async (event) => {
     event.preventDefault();
 
-    if (currState === "Signup" && !isDataSubmitted) {
-      setIsDataSubmitted(true);
+    const result = await login(currState.toLowerCase(), { fullName, email, password, bio });
+
+    if (!result.success) {
+      setErrorMessage(result.message);
       return;
     }
-    login(currState==="Signup"? 'signup':'login',{fullName, email, password, bio})
 
-    console.log({ fullName, email, password, bio });
+    setErrorMessage("");
   };
 
   return (
@@ -41,21 +42,12 @@ const LoginPage = () => {
         className="border-2 bg-white/8 text-white border-gray-500 p-6 flex flex-col gap-6 rounded-lg shadow-lg"
       >
 
-        <h2 className="font-medium text-2xl flex justify-between items-center">
+        <h2 className="font-medium text-2xl">
           {currState}
-
-          {isDataSubmitted && (
-            <img
-              src={assets.arrow_icon}
-              alt=""
-              className="w-5 cursor-pointer"
-              onClick={() => setIsDataSubmitted(false)}
-            />
-          )}
         </h2>
 
         {/* Full Name */}
-        {currState === "Signup" && !isDataSubmitted && (
+        {currState === "Signup" && (
           <input
             type="text"
             placeholder="Full Name"
@@ -66,47 +58,53 @@ const LoginPage = () => {
           />
         )}
 
-        {/* Email + Password */}
-        {!isDataSubmitted && (
-          <>
-            <input
-              type="email"
-              placeholder="Email Address"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              required
-            />
+        {/* Email */}
+        <input
+          type="email"
+          placeholder="Email Address"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          className="p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          required
+        />
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              required
-            />
-          </>
-        )}
+        {/* Password */}
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          className="p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          required
+        />
 
         {/* Bio */}
-        {currState === "Signup" && !isDataSubmitted && (
+        {currState === "Signup" && (
           <textarea
             rows={4}
             value={bio}
             onChange={(e) => setBio(e.target.value)}
             placeholder="Short Bio"
             className="p-2 border border-gray-500 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            required
           />
         )}
 
         {/* Submit */}
         <button
           type="submit"
-          className="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-md"
+          disabled={isLoading}
+          className="bg-indigo-500 hover:bg-indigo-600 disabled:bg-indigo-400 text-white font-bold py-2 px-4 rounded-md disabled:cursor-not-allowed"
         >
-          {currState === "Signup" ? "Create Account" : "Login"}
+          {isLoading ? "Processing..." : (currState === "Signup" ? "Create Account" : "Login")}
         </button>
+
+        {/* Error message */}
+        {errorMessage && (
+          <p className="text-red-300 text-sm mt-2" role="alert">
+            {errorMessage}
+          </p>
+        )}
 
         {/* Terms */}
         <div className="flex items-center gap-2 text-sm">
@@ -123,7 +121,6 @@ const LoginPage = () => {
               <span
                 onClick={() => {
                   setCurrState("Login");
-                  setIsDataSubmitted(false);
                 }}
                 className="text-indigo-400 cursor-pointer"
               >
@@ -136,7 +133,6 @@ const LoginPage = () => {
               <span
                 onClick={() => {
                   setCurrState("Signup");
-                  setIsDataSubmitted(false);
                 }}
                 className="text-indigo-400 cursor-pointer"
               >

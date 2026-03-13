@@ -1,19 +1,19 @@
-import React, { useContext, useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState, memo } from 'react'
 import assets from '../assets/assets'
 import { useNavigate } from 'react-router-dom'
 import { AuthContext } from '../context/AuthContext'
 import { ChatContext } from '../context/ChatContext'
 
-const Sidebar = ({ selectedUser, setSelectedUser }) => {
+const Sidebar = () => {
   const{getUsers,users,selectedUser,setSelectedUser,unseenMessage,setUnseenMessage} = useContext(ChatContext);
 
   const{logout,onlineUsers} = useContext(AuthContext)
-  const [input, setinput] =useState(false)
+  const [input, setInput] = useState('')
   const navigate = useNavigate();
-  const filteredUsers = input? users.filter((user) => user.username.toLowerCase().includes(input.toLowerCase())):users;
+  const filteredUsers = input? users.filter((user) => user.fullName.toLowerCase().includes(input.toLowerCase())):users;
   useEffect(()=>{
     getUsers();
-  },[onlineUsers])
+  },[onlineUsers, getUsers])
   return (
     <div
       className={`bg-[#8185B2]/10 h-full p-5 rounded-r-xl overflow-y-scroll text-white ${
@@ -52,7 +52,7 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
         <div className="bg-[#282142] rounded-full flex items-center gap-2 py-3 px-4 mt-5">
           <img src={assets.search_icon} alt="Search" className="w-3" />
 
-          <input onClick={(e)=>setinput(e.target.value)}
+          <input onChange={(e)=>setInput(e.target.value)}
             type="text"
             placeholder="Search User..."
             className="bg-transparent border-none outline-none text-white text-xs placeholder-[#cfc8c8] flex-1"
@@ -96,7 +96,7 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
 
             {unseenMessage[user._id]>0 && (
               <span className="absolute top-3 right-3 text-xs h-5 w-5 flex justify-center items-center rounded-full bg-violet-500/50">
-                {index}
+                {unseenMessage[user._id]}
               </span>
             )}
 
@@ -109,4 +109,4 @@ const Sidebar = ({ selectedUser, setSelectedUser }) => {
   )
 }
 
-export default Sidebar
+export default memo(Sidebar)

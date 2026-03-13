@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useContext } from "react";
+import React, { useRef, useEffect, useState, useContext, memo } from "react";
 import assets from "../assets/assets";
 import { formateMessageTime } from "../lib/utils";
 import toast from "react-hot-toast";
@@ -25,7 +25,7 @@ const ChatContainer = () => {
     if (selectedUser) {
       getMessages(selectedUser._id);
     }
-  }, [selectedUser]);
+  }, [selectedUser, getMessages]);
 
   // Send text message
   const handleSendMessage = async (e) => {
@@ -186,4 +186,4 @@ const ChatContainer = () => {
   );
 };
 
-export default ChatContainer;
+export default memo(ChatContainer);

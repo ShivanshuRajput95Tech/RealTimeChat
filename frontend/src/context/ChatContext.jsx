@@ -1,7 +1,9 @@
-import { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState, useEffect, useCallback } from "react";
 import toast from "react-hot-toast";
 import { AuthContext } from "./AuthContext";
 
+
+export const ChatContext = createContext();
 
 export const ChatProvider = ({ children }) => {
 
@@ -24,7 +26,7 @@ export const ChatProvider = ({ children }) => {
         setUnseenMessages(data.unseenMessages);
       }
 
-    } catch (error) {
+    } catch {
       toast.error("Failed to load users");
     }
   };
@@ -40,7 +42,7 @@ export const ChatProvider = ({ children }) => {
         setMessages(data.messages);
       }
 
-    } catch (error) {
+    } catch {
       toast.error("Failed to load messages");
     }
   };
@@ -63,14 +65,14 @@ export const ChatProvider = ({ children }) => {
 
       }
 
-    } catch (error) {
+    } catch {
       toast.error("Failed to send message");
     }
   };
 
 
   // SUBSCRIBE TO SOCKET MESSAGES
-  const subscribeToMessages = () => {
+  const subscribeToMessages = useCallback(() => {
 
     if (!socket) return;
 
@@ -98,13 +100,13 @@ export const ChatProvider = ({ children }) => {
 
     });
 
-  };
+  }, [socket, selectedUser, axios]);
 
 
   // UNSUBSCRIBE
-  const unsubscribeFromMessages = () => {
+  const unsubscribeFromMessages = useCallback(() => {
     socket?.off("newMessage");
-  };
+  }, [socket]);
 
 
   useEffect(() => {
@@ -113,7 +115,7 @@ export const ChatProvider = ({ children }) => {
 
     return () => unsubscribeFromMessages();
 
-  }, [socket, selectedUser]);
+  }, [socket, selectedUser, subscribeToMessages, unsubscribeFromMessages]);
 
 
   const value = {

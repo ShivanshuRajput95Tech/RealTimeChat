@@ -1,15 +1,12 @@
-import React, { useContext, useEffect } from 'react'
-import assets, { imagesDummyData } from '../assets/assets'
+import React, { useContext, useMemo } from 'react'
+import assets from '../assets/assets'
 import { ChatContext } from '../context/ChatContext'
+import { AuthContext } from '../context/AuthContext'
 
 const RightSidebar = () => {
   const {selectedUser, message} = useContext(ChatContext)
-  const{logout,onlineUser} =useContext(AuthContext)
-  const[msgImage,setMsgImage] = useState([])
-//get all the image from the message and set them to state
-useEffect(()=>{
-  setMsgImage(message.filter((msg)=>msg.image).map((msg)=>msg.image))
-})
+  const{logout,onlineUsers} =useContext(AuthContext)
+  const msgImage = useMemo(() => message.filter((msg)=>msg.image).map((msg)=>msg.image), [message])
   if (!selectedUser) return null
 
   return (
@@ -28,7 +25,7 @@ useEffect(()=>{
         />
 
         <h1 className="px-10 text-xl font-medium mx-auto flex items-center gap-2">
-          {onlineUsers.include(selectedUser._id) &&<span className="w-2 h-2 rounded-full bg-green-500"></span>}
+          {onlineUsers.includes(selectedUser._id) &&<span className="w-2 h-2 rounded-full bg-green-500"></span>}
           {selectedUser?.fullName}
         </h1>
 

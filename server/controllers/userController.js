@@ -1,31 +1,36 @@
 import { generateToken } from "../lib/utils.js";
 import User from "../models/User.js";
-import bcrypt from "bcryptjs";
+import bcrypt from "bcrypt";
 
 
 // Signup
 export const signup = async(req, res) => {
-    const { fullName, email, password, bio } = req.body;
-
     try {
-        if (!fullName || !email || !password || !bio) {
-            return res.json({ success: false, message: "Missing Details" });
+        const { fullName, email, password, bio } = req.body;
+
+        // Validation
+        if (!fullName?.trim() || !email?.trim() || !password?.trim() || !bio?.trim()) {
+            return res.status(400).json({ success: false, message: "All fields are required" });
         }
 
-        const user = await User.findOne({ email });
+        if (password.length < 6) {
+            return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+        }
+
+        const user = await User.findOne({ email: email.toLowerCase() });
 
         if (user) {
-            return res.json({ success: false, message: "Account already exists" });
+            return res.status(409).json({ success: false, message: "Account already exists" });
         }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
         const newUser = new User({
-            fullName,
-            email,
+            fullName: fullName.trim(),
+            email: email.toLowerCase().trim(),
             password: hashedPassword,
-            bio,
+            bio: bio.trim(),
         });
 
         await newUser.save();
@@ -34,7 +39,7 @@ export const signup = async(req, res) => {
 
         const { password: _, ...userData } = newUser._doc;
 
-        res.json({
+        res.status(201).json({
             success: true,
             userData,
             token,
@@ -42,8 +47,8 @@ export const signup = async(req, res) => {
         });
 
     } catch (error) {
-        console.log(error.message);
-        res.json({ success: false, message: "An error occurred" });
+        console.error("Signup error:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
 
@@ -51,25 +56,23 @@ export const signup = async(req, res) => {
 // Login
 export const login = async(req, res) => {
     try {
-
         const { email, password } = req.body;
 
-        const userData = await User.findOne({ email });
-
-        if (!userData) {
-            return res.json({ success: false, message: "User not found" });
+        // Validation
+        if (!email?.trim() || !password?.trim()) {
+            return res.status(400).json({ success: false, message: "Email and password are required" });
         }
 
-        const isPasswordCorrect = await bcrypt.compare(
-            password,
-            userData.password
-        );
+        const userData = await User.findOne({ email: email.toLowerCase().trim() });
+
+        if (!userData) {
+            return res.status(401).json({ success: false, message: "Invalid credentials" });
+        }
+
+        const isPasswordCorrect = await bcrypt.compare(password, userData.password);
 
         if (!isPasswordCorrect) {
-            return res.json({
-                success: false,
-                message: "Invalid credentials",
-            });
+            return res.status(401).json({ success: false, message: "Invalid credentials" });
         }
 
         const token = generateToken(userData._id);
@@ -80,12 +83,12 @@ export const login = async(req, res) => {
             success: true,
             userData: userWithoutPassword,
             token,
-            message: "Login Success",
+            message: "Login successful",
         });
 
     } catch (error) {
-        console.log(error);
-        res.json({ success: false, message: "Server error" });
+        console.error("Login error:", error);
+        res.status(500).json({ success: false, message: "Internal server error" });
     }
 };
 
