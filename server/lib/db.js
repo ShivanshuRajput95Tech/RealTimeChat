@@ -14,8 +14,14 @@ export const connectDB = async() => {
             bufferCommands: false, // Disable mongoose buffering
         };
 
-        // Connect to MongoDB
-        await mongoose.connect(`${process.env.MONGODB_URI}/chatapp`, options);
+        // Connect to MongoDB using MONGODB_URI, optionally with DB name.
+        const mongoUri = process.env.MONGODB_URI;
+        if (!mongoUri) {
+            throw new Error("MONGODB_URI is not set in environment variables.");
+        }
+
+        const dbName = process.env.MONGODB_DB || "chatapp";
+        await mongoose.connect(mongoUri, { ...options, dbName });
 
         // `bufferMaxEntries` is not supported in newer MongoDB drivers. Use `bufferCommands` instead.
         mongoose.connection.on("connected", () => {

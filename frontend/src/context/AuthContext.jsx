@@ -75,7 +75,8 @@ export const AuthProvider = ({ children }) => {
       if (data.success) {
         setAuthUser(data.userData);
         connectSocket(data.userData);
-        axios.defaults.headers.common["token"] = data.token;
+        const authHeader = `Bearer ${data.token}`;
+        axios.defaults.headers.common["Authorization"] = authHeader;
         setToken(data.token);
         localStorage.setItem("token", data.token);
         toast.success(data.message);
@@ -124,7 +125,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
 
-      const { data } = await axios.put("/api/auth/updateProfile", body);
+      const { data } = await axios.put("/api/auth/update-profile", body);
 
       if (data.success) {
         setAuthUser(data.userData);
@@ -144,7 +145,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
 
     if (token) {
-      axios.defaults.headers.common["token"] = token;
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       checkAuth();
     }
 

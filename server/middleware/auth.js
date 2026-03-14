@@ -4,10 +4,14 @@ import jwt from "jsonwebtoken";
 export const protectRoute = async(req, res, next) => {
     try {
 
-        const token = req.headers.authorization;
+        let token = req.headers.authorization || req.headers.token;
 
         if (!token) {
-            return res.json({ success: false, message: "Not authorized" });
+            return res.status(401).json({ success: false, message: "Not authorized" });
+        }
+
+        if (token.startsWith('Bearer ')) {
+            token = token.split(' ')[1];
         }
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
