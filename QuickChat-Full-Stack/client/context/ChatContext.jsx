@@ -11,6 +11,8 @@ export const ChatProvider = ({ children })=>{
     const [users, setUsers] = useState([]);
     const [selectedUser, setSelectedUser] = useState(null)
     const [unseenMessages, setUnseenMessages] = useState({})
+    const [isTyping, setIsTyping] = useState({}) // { userId: boolean }
+    const [typingTimeout, setTypingTimeout] = useState(null)
 
     const {socket, axios} = useContext(AuthContext);
 
@@ -54,34 +56,70 @@ export const ChatProvider = ({ children })=>{
     }
 
     // function to subscribe to messages for selected user
-    const subscribeToMessages = async () =>{
-        if(!socket) return;
+    const subscribeToMessages = async () => {
+        if (!socket) return;
 
-        socket.on("newMessage", (newMessage)=>{
-            if(selectedUser && newMessage.senderId === selectedUser._id){
+        const handleNewMessage = (newMessage) => {
+            if (selectedUser && newMessage.senderId === selectedUser._id) {
                 newMessage.seen = true;
-                setMessages((prevMessages)=> [...prevMessages, newMessage]);
+                setMessages((prevMessages) => [...prevMessages, newMessage]);
                 axios.put(`/api/messages/mark/${newMessage._id}`);
-            }else{
-                setUnseenMessages((prevUnseenMessages)=>({
-                    ...prevUnseenMessages, [newMessage.senderId] : prevUnseenMessages[newMessage.senderId] ? prevUnseenMessages[newMessage.senderId] + 1 : 1
-                }))
+            } else {
+                setUnseenMessages((prevUnseenMessages) => ({
+                    ...prevUnseenMessages,
+                    [newMessage.senderId]: prevUnseenMessages[newMessage.senderId] ? prevUnseenMessages[newMessage.senderId] + 1 : 1,
+                }));
             }
-        })
+        };
+
+        const handleTyping = (data) => {
+            if (selectedUser && data.userId === selectedUser._id) {
+                setIsTyping((prev) => ({ ...prev, [data.userId]: true }));
+            }
+        };
+
+        const handleStopTyping = (data) => {
+            if (selectedUser && data.userId === selectedUser._id) {
+                setIsTyping((prev) => ({ ...prev, [data.userId]: false }));
+            }
+        };
+
+        socket.on("newMessage", handleNewMessage);
+        socket.on("typing", handleTyping);
+        socket.on("stopTyping", handleStopTyping);
+
+        // Store the handler references on socket for cleanup as needed
+        socket._handlers = { handleNewMessage, handleTyping, handleStopTyping };
     }
 
     // function to unsubscribe from messages
-    const unsubscribeFromMessages = ()=>{
-        if(socket) socket.off("newMessage");
-    }
+    const unsubscribeFromMessages = () => {
+        if (!socket || !socket._handlers) return;
 
-    useEffect(()=>{
+        const { handleNewMessage, handleTyping, handleStopTyping } = socket._handlers;
+        socket.off("newMessage", handleNewMessage);
+        socket.off("typing", handleTyping);
+        socket.off("stopTyping", handleStopTyping);
+        delete socket._handlers;
+    };
+
+    useEffect(() => {
         subscribeToMessages();
-        return ()=> unsubscribeFromMessages();
-    },[socket, selectedUser])
+        return () => unsubscribeFromMessages();
+    }, [socket, selectedUser]);
+
+    // Update document title with unread count
+    useEffect(() => {
+        const totalUnseen = Object.values(unseenMessages).reduce((a, b) => a + (b || 0), 0);
+        if (totalUnseen > 0) {
+            document.title = `Chatify (${totalUnseen} new)`;
+        } else {
+            document.title = 'Chatify';
+        }
+    }, [unseenMessages])
 
     const value = {
-        messages, users, selectedUser, getUsers, getMessages, sendMessage, setSelectedUser, unseenMessages, setUnseenMessages
+        messages, users, selectedUser, getUsers, getMessages, sendMessage, setSelectedUser, unseenMessages, setUnseenMessages, isTyping, typingTimeout, setTypingTimeout
     }
 
     return (

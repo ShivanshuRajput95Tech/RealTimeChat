@@ -1,95 +1,61 @@
-import Message from "../models/Message.js";
-import User from "../models/User.js";
-import cloudinary from "../lib/cloudinary.js"
+import MessageService from "../services/messageService.js";
+import { validateSendMessage, validatePagination } from "../lib/validators.js";
+import { asyncHandler } from "../lib/errors.js";
+import logger from "../lib/logger.js";
 import { io, userSocketMap } from "../server.js";
 
+// Get all users except the logged in user with unseen message counts
+export const getUsersForSidebar = asyncHandler(async (req, res) => {
+    const userId = req.user._id;
+    logger.debug("Fetching users for sidebar", { userId });
 
-// Get all users except the logged in user
-export const getUsersForSidebar = async (req, res)=>{
-    try {
-        const userId = req.user._id;
-        const filteredUsers = await User.find({_id: {$ne: userId}}).select("-password");
+    const { users, unseenMessages } = await MessageService.getUsersForSidebar(userId);
+    
+    res.json({ success: true, users, unseenMessages });
+});
 
-        // Count number of messages not seen
-        const unseenMessages = {}
-        const promises = filteredUsers.map(async (user)=>{
-            const messages = await Message.find({senderId: user._id, receiverId: userId, seen: false})
-            if(messages.length > 0){
-                unseenMessages[user._id] = messages.length;
-            }
-        })
-        await Promise.all(promises);
-        res.json({success: true, users: filteredUsers, unseenMessages})
-    } catch (error) {
-        console.log(error.message);
-        res.json({success: false, message: error.message})
+// Get all messages for selected user with pagination
+export const getMessages = asyncHandler(async (req, res) => {
+    const { id: selectedUserId } = req.params;
+    const myId = req.user._id;
+    
+    const { page, limit } = validatePagination(req.query.page, req.query.limit);
+    logger.debug("Fetching messages", { userId: myId, selectedUserId, page, limit });
+
+    const result = await MessageService.getMessages(myId, selectedUserId, page, limit);
+    
+    res.json({ success: true, ...result });
+});
+
+// Mark message as seen using message id
+export const markMessageAsSeen = asyncHandler(async (req, res) => {
+    const { id } = req.params;
+    logger.debug("Marking message as seen", { messageId: id });
+    
+    await MessageService.markMessageAsRead(id);
+    
+    res.json({ success: true });
+});
+
+// Send message to selected user with image upload support
+export const sendMessage = asyncHandler(async (req, res) => {
+    const validatedData = validateSendMessage(req.body);
+    const receiverId = req.params.id;
+    const senderId = req.user._id;
+
+    logger.debug("Sending message", { senderId, receiverId, hasImage: !!validatedData.image });
+
+    const newMessage = await MessageService.sendMessage(senderId, receiverId, validatedData);
+
+    // Emit the new message to the receiver's socket(s)
+    const receiverSockets = userSocketMap.get(receiverId);
+    if (receiverSockets && receiverSockets.size > 0) {
+        receiverSockets.forEach((socketId) => {
+            io.to(socketId).emit("newMessage", newMessage);
+        });
     }
-}
 
-// Get all messages for selected user
-export const getMessages = async (req, res) =>{
-    try {
-        const { id: selectedUserId } = req.params;
-        const myId = req.user._id;
+    logger.info("Message sent successfully", { messageId: newMessage._id, senderId, receiverId });
 
-        const messages = await Message.find({
-            $or: [
-                {senderId: myId, receiverId: selectedUserId},
-                {senderId: selectedUserId, receiverId: myId},
-            ]
-        })
-        await Message.updateMany({senderId: selectedUserId, receiverId: myId}, {seen: true});
-
-        res.json({success: true, messages})
-
-
-    } catch (error) {
-        console.log(error.message);
-        res.json({success: false, message: error.message})
-    }
-}
-
-// api to mark message as seen using message id
-export const markMessageAsSeen = async (req, res)=>{
-    try {
-        const { id } = req.params;
-        await Message.findByIdAndUpdate(id, {seen: true})
-        res.json({success: true})
-    } catch (error) {
-        console.log(error.message);
-        res.json({success: false, message: error.message})
-    }
-}
-
-// Send message to selected user
-export const sendMessage = async (req, res) =>{
-    try {
-        const {text, image} = req.body;
-        const receiverId = req.params.id;
-        const senderId = req.user._id;
-
-        let imageUrl;
-        if(image){
-            const uploadResponse = await cloudinary.uploader.upload(image)
-            imageUrl = uploadResponse.secure_url;
-        }
-        const newMessage = await Message.create({
-            senderId,
-            receiverId,
-            text,
-            image: imageUrl
-        })
-
-        // Emit the new message to the receiver's socket
-        const receiverSocketId = userSocketMap[receiverId];
-        if (receiverSocketId){
-            io.to(receiverSocketId).emit("newMessage", newMessage)
-        }
-
-        res.json({success: true, newMessage});
-
-    } catch (error) {
-        console.log(error.message);
-        res.json({success: false, message: error.message})
-    }
-}
+    res.json({ success: true, newMessage });
+});

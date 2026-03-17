@@ -1,81 +1,92 @@
-import { generateToken } from "../lib/utils.js";
-import User from "../models/User.js";
-import bcrypt from "bcryptjs";
-import cloudinary from "../lib/cloudinary.js"
+import AuthService from '../services/authService.js';
+import UserService from '../services/userService.js';
+import {
+  validateSignup,
+  validateLogin,
+  validateUpdateProfile,
+} from '../lib/validators.js';
+import { asyncHandler } from '../lib/errors.js';
+import logger from '../lib/logger.js';
 
-// Signup a new user
-export const signup = async (req, res)=>{
-    const { fullName, email, password, bio } = req.body;
+// Register a new user
+export const signup = asyncHandler(async (req, res) => {
+  const validatedData = validateSignup(req.body);
+  const userData = await AuthService.signup(validatedData);
+  const { token, refreshToken } = AuthService.generateTokens(userData._id);
 
-    try {
-        if (!fullName || !email || !password || !bio){
-            return res.json({success: false, message: "Missing Details" })
-        }
-        const user = await User.findOne({email});
+  res.status(201).json({
+    success: true,
+    userData,
+    token,
+    refreshToken,
+    message: 'Account created successfully',
+  });
+});
 
-        if(user){
-            return res.json({success: false, message: "Account already exists" })
-        }
+// Login a user
+export const login = asyncHandler(async (req, res) => {
+  const validatedData = validateLogin(req.body);
+  const userData = await AuthService.login(validatedData);
+  const { token, refreshToken } = AuthService.generateTokens(userData._id);
 
-        const salt = await bcrypt.genSalt(10);
-        const hashedPassword = await bcrypt.hash(password, salt);
+  logger.info('User login successful', { userId: userData._id, email: userData.email });
 
-        const newUser = await User.create({
-            fullName, email, password: hashedPassword, bio
-        });
+  res.json({
+    success: true,
+    userData,
+    token,
+    refreshToken,
+    message: 'Login successful',
+  });
+});
 
-        const token = generateToken(newUser._id)
+// Check if user is authenticated
+export const checkAuth = asyncHandler(async (req, res) => {
+  const user = await UserService.getUserById(req.user._id);
 
-        res.json({success: true, userData: newUser, token, message: "Account created successfully"})
-    } catch (error) {
-        console.log(error.message);
-        res.json({success: false, message: error.message})
-    }
-}
+  res.json({
+    success: true,
+    user,
+  });
+});
 
-// Controller to login a user
-export const login = async (req, res) =>{
-    try {
-        const { email, password } = req.body;
-        const userData = await User.findOne({email})
+// Update user profile
+export const updateProfile = asyncHandler(async (req, res) => {
+  const validatedData = validateUpdateProfile(req.body);
+  const user = await UserService.updateProfile(req.user._id, validatedData);
 
-        const isPasswordCorrect = await bcrypt.compare(password, userData.password);
+  res.json({
+    success: true,
+    user,
+    message: 'Profile updated successfully',
+  });
+});
 
-        if (!isPasswordCorrect){
-            return res.json({ success: false, message: "Invalid credentials" });
-        }
+// Get user by ID
+export const getUser = asyncHandler(async (req, res) => {
+  const user = await UserService.getUserById(req.params.id);
 
-        const token = generateToken(userData._id)
+  res.json({
+    success: true,
+    user,
+  });
+});
 
-        res.json({success: true, userData, token, message: "Login successful"})
-    } catch (error) {
-        console.log(error.message);
-        res.json({success: false, message: error.message})
-    }
-}
-// Controller to check if user is authenticated
-export const checkAuth = (req, res)=>{
-    res.json({success: true, user: req.user});
-}
+// Search users
+export const searchUsers = asyncHandler(async (req, res) => {
+  const { q, limit = 20 } = req.query;
 
-// Controller to update user profile details
-export const updateProfile = async (req, res)=>{
-    try {
-        const { profilePic, bio, fullName } = req.body;
+  if (!q) {
+    return res.status(400).json({
+      success: false,
+      message: 'Search query is required',
+    });
+  }
 
-        const userId = req.user._id;
-        let updatedUser;
+  const users = await UserService.searchUsers(q, parseInt(limit, 10));
 
-        if(!profilePic){
-            updatedUser = await User.findByIdAndUpdate(userId, {bio, fullName}, {new: true});
-        } else{
-            const upload = await cloudinary.uploader.upload(profilePic);
-
-            updatedUser = await User.findByIdAndUpdate(userId, {profilePic: upload.secure_url, bio, fullName}, {new: true});
-        }
-        res.json({success: true, user: updatedUser})
-    } catch (error) {
-        console.log(error.message);
-        res.json({success: false, message: error.message})
-    }
-}
+  res.json({
+    success: true,
+    users,
+  });
+});
