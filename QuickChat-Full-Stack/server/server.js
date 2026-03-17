@@ -29,11 +29,14 @@ export const userSocketMap = new Map(); // Map<userId, Set<socketId>>
 // Socket.io authentication middleware
 io.use((socket, next) => {
     try {
-        const token = socket.handshake.auth?.token || socket.handshake.query?.token;
+        let token = socket.handshake.auth?.token || socket.handshake.query?.token;
         if (!token) {
             logger.warn("Socket connection failed: token required", { socketId: socket.id });
             return next(new Error('Authentication error: token required'));
         }
+
+        // Allow Bearer token or raw token
+        token = token.replace(/^Bearer\s+/i, '');
 
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
         socket.userId = decoded.userId;

@@ -40,22 +40,10 @@ const messageSchema = new mongoose.Schema(
   }
 );
 
-// Create indexes for performance (2026 optimized)
-// Primary index for conversation queries (O(log n) instead of O(n))
+// Create indexes for performance
 messageSchema.index({ senderId: 1, receiverId: 1, createdAt: -1 });
-
-// For unread message counts and filtering
-messageSchema.index({ receiverId: 1, seen: 1, createdAt: -1 });
-
-// For sender-focused queries (e.g., user's outgoing messages)
-messageSchema.index({ senderId: 1, createdAt: -1 });
-
-// For message cleanup/archival (TTL index for auto-deletion if needed)
-// messageSchema.index({ createdAt: 1 }, { expireAfterSeconds: 31536000 }); // 1 year
-
-// Avoid individual indexes when compound indexes exist
-// Individual indexes on fields are created automatically by mongoose
-// but we explicitly define compounds for clarity and control
+messageSchema.index({ receiverId: 1, seen: 1 }); // For unread counts
+messageSchema.index({ createdAt: -1 }); // For cleanup/TTL
 
 const Message = mongoose.model("Message", messageSchema);
 

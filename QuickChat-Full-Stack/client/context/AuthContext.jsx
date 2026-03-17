@@ -4,7 +4,10 @@ import toast from "react-hot-toast";
 import { io } from "socket.io-client"
 
 
-const backendUrl = import.meta.env.VITE_BACKEND_URL;
+const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL;
+if (!backendUrl) {
+    console.warn('VITE_BACKEND_URL or VITE_API_URL must be set in client .env');
+}
 axios.defaults.baseURL = backendUrl;
 
 export const AuthContext = createContext();
@@ -56,9 +59,12 @@ const login = async (state, credentials) => {
         setToken(null);
         setAuthUser(null);
         setOnlineUsers([]);
-        axios.defaults.headers.common["token"] = null;
-        toast.success("Logged out successfully")
-        socket.disconnect();
+        delete axios.defaults.headers.common["Authorization"];
+        delete axios.defaults.headers.common["token"];
+        toast.success("Logged out successfully");
+        if (socket && socket.disconnect) {
+            socket.disconnect();
+        }
     }
 
     // Update profile function to handle user profile updates

@@ -53,14 +53,19 @@ export class AuthService {
 
     logger.info('User login attempt', { email });
 
-    // Find user
-    const user = await User.findOne({ email });
+    // Find user and include hashed password for verification
+    const user = await User.findOne({ email }).select('+password');
     if (!user) {
       logger.warn('Login failed: user not found', { email });
       throw new UnauthorizedError('Invalid email or password');
     }
 
     // Verify password
+    if (!user.password) {
+      logger.warn('Login failed: password hash missing', { email });
+      throw new UnauthorizedError('Invalid email or password');
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       logger.warn('Login failed: invalid password', { email });
