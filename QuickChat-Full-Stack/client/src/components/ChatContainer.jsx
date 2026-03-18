@@ -117,12 +117,12 @@ const ChatContainer = () => {
           <div className='mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-500 to-cyan-500 text-4xl shadow-lg'>
             💬
           </div>
-          <h2 className='text-3xl font-bold'>Your conversations, redesigned.</h2>
+          <h2 className='text-3xl font-bold'>All conversations in one focused workspace.</h2>
           <p className={`mt-3 text-sm leading-6 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-            Pick a contact from the sidebar to jump into real-time chat, image sharing, and live typing updates without breaking your current workflow.
+            Select a contact to review history, share media, and continue conversations with real-time updates.
           </p>
           <div className='mt-6 grid gap-3 sm:grid-cols-3'>
-            {['Live messages', 'Typing sync', 'Responsive layout'].map((item) => (
+            {['Live sync', 'Secure sessions', 'Responsive layout'].map((item) => (
               <div
                 key={item}
                 className={`rounded-2xl border px-3 py-3 text-xs font-medium ${isDark ? 'border-white/8 bg-white/5 text-slate-200' : 'border-slate-200 bg-slate-50 text-slate-700'}`}
@@ -169,7 +169,7 @@ const ChatContainer = () => {
             ) : (
               <div className='flex flex-wrap items-center gap-2'>
                 <p className={`text-xs ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-                  {isOnline ? 'Available now' : 'Currently offline'}
+                  {isOnline ? 'Active now' : 'Offline'}
                 </p>
                 {selectedUser.bio && (
                   <span className={`hidden rounded-full px-2 py-0.5 text-[10px] font-medium sm:inline-flex ${isDark ? 'bg-white/6 text-slate-300' : 'bg-slate-100 text-slate-500'}`}>
@@ -268,7 +268,7 @@ const ChatContainer = () => {
           </div>
 
           <div className={`flex items-center justify-between px-1 text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-            <span>Messages sync instantly with the backend and socket session.</span>
+            <span>Messages stay synchronized with the backend and real-time session.</span>
             <span className='hidden sm:inline'>Press Enter to send</span>
           </div>
         </div>

@@ -50,9 +50,9 @@ const Sidebar = () => {
       <div className={`rounded-[30px] border p-4 shadow-xl backdrop-blur-xl ${isDark ? 'border-white/10 bg-slate-900/60' : 'border-white bg-white/90'}`}>
         <div className='flex items-start justify-between gap-3'>
           <div>
-            <p className={`text-[11px] uppercase tracking-[0.22em] ${isDark ? 'text-cyan-300' : 'text-cyan-600'}`}>Realtime messenger</p>
+            <p className={`text-[11px] uppercase tracking-[0.22em] ${isDark ? 'text-cyan-300' : 'text-cyan-600'}`}>Professional messaging</p>
             <h1 className={`mt-2 text-2xl font-bold tracking-tight ${isDark ? 'text-white' : 'text-slate-900'}`}>Chatify</h1>
-            <p className={`mt-1 text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Modern chat UI, same workflow.</p>
+            <p className={`mt-1 text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Enterprise-ready UI with the same trusted logic.</p>
           </div>
 
           <div className='flex gap-1'>
@@ -101,14 +101,14 @@ const Sidebar = () => {
                 : 'bg-white text-slate-700 shadow hover:bg-slate-50'
           }`}
         >
-          {showDashboard ? 'Hide overview' : 'Show overview'}
+          {showDashboard ? 'Close overview' : 'Overview'}
         </button>
         <button
           type='button'
           onClick={handleLogout}
           className='flex-1 rounded-2xl bg-rose-500/85 px-3 py-2 text-xs font-semibold text-white transition hover:bg-rose-600'
         >
-          Logout
+          Sign out
         </button>
       </div>
 
@@ -151,7 +151,7 @@ const Sidebar = () => {
           </div>
 
           <div className='mt-3 flex items-center justify-between px-1'>
-            <p className={`text-[11px] uppercase tracking-[0.18em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Recent contacts</p>
+            <p className={`text-[11px] uppercase tracking-[0.18em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Conversations</p>
             <span className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{filteredUsers.length} shown</span>
           </div>
 

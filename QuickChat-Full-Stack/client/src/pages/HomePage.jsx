@@ -14,12 +14,12 @@ const HomePage = () => {
       <div className={`mx-auto flex h-[calc(100vh-1.5rem)] max-w-[1600px] flex-col overflow-hidden rounded-[34px] border shadow-[0_30px_90px_rgba(15,23,42,0.22)] backdrop-blur-xl sm:h-[calc(100vh-2.5rem)] ${isDark ? 'border-white/10 bg-slate-950/45' : 'border-white bg-white/70'}`}>
         <div className={`hidden items-center justify-between border-b px-6 py-4 lg:flex ${isDark ? 'border-white/10 bg-slate-900/45 text-white' : 'border-slate-200 bg-white/60 text-slate-900'}`}>
           <div>
-            <p className={`text-[11px] uppercase tracking-[0.22em] ${isDark ? 'text-cyan-300' : 'text-cyan-600'}`}>Latest UI refresh</p>
-            <h2 className='mt-1 text-lg font-semibold'>Refined design, same synchronized chat flow</h2>
+            <p className={`text-[11px] uppercase tracking-[0.22em] ${isDark ? 'text-cyan-300' : 'text-cyan-600'}`}>Workspace experience</p>
+            <h2 className='mt-1 text-lg font-semibold'>A more professional interface powered by the same synchronized chat logic</h2>
           </div>
           <div className='flex items-center gap-3'>
             <div className={`rounded-full px-3 py-1 text-xs font-medium ${isDark ? 'bg-white/6 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
-              {selectedUser ? `Chatting with ${selectedUser.fullName}` : 'Select a conversation'}
+              {selectedUser ? `Chatting with ${selectedUser.fullName}` : 'Select a conversation to begin'}
             </div>
           </div>
         </div>
