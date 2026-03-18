@@ -4,7 +4,7 @@ import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import { Toaster } from 'react-hot-toast';
-import { useAuth } from '../context/auth-context';
+import { useAuth } from '../context';
 
 const App = () => {
   const { authUser, isCheckingAuth } = useAuth();

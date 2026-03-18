@@ -1,8 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../context/auth-context';
-import { useChat } from '../../context/chat-context';
-import { useTheme } from '../../context/theme-context';
+import { useAuth, useChat, useTheme } from '../../context';
 import UserCard from './ui/UserCard';
 
 const Sidebar = () => {

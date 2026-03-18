@@ -1,7 +1,7 @@
 import React from 'react';
 import StatusBadge from './StatusBadge';
 import assets from '../../assets/assets';
-import { useTheme } from '../../../context/theme-context';
+import { useTheme } from '../../../context';
 
 const UserCard = ({ user, onSelect, selected, online, unseen }) => {
   const { isDark } = useTheme();

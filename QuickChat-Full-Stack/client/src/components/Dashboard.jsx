@@ -1,7 +1,5 @@
 import React, { useMemo } from 'react'
-import { useChat } from '../../context/chat-context'
-import { useAuth } from '../../context/auth-context'
-import { useTheme } from '../../context/theme-context'
+import { useAuth, useChat, useTheme } from '../../context'
 
 const Dashboard = () => {
   const { users, messages, unseenMessages } = useChat()

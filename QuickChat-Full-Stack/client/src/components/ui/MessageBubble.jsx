@@ -1,7 +1,7 @@
 import React from 'react';
 import { formatMessageTime } from '../../lib/utils';
 import assets from '../../assets/assets';
-import { useTheme } from '../../../context/theme-context';
+import { useTheme } from '../../../context';
 
 const MessageBubble = ({ msg, isMine, peerAvatar, myAvatar }) => {
   const { isDark } = useTheme();

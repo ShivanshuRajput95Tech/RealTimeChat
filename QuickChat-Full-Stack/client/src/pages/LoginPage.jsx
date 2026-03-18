@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import assets from '../assets/assets';
-import { useAuth } from '../../context/auth-context';
+import { useAuth } from '../../context';
 import toast from 'react-hot-toast';
 
 const featurePoints = [

@@ -2,8 +2,7 @@ import React from 'react';
 import Sidebar from '../components/Sidebar';
 import ChatContainer from '../components/ChatContainer';
 import RightSidebar from '../components/RightSidebar';
-import { useChat } from '../../context/chat-context';
-import { useTheme } from '../../context/theme-context';
+import { useChat, useTheme } from '../../context';
 
 const HomePage = () => {
   const { selectedUser } = useChat();

@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { ChatContext } from './chat-context';
-import { useAuth } from './auth-context';
+import { ChatContext, useAuth } from '.';
 import { extractErrorMessage } from '../src/lib/api';
 
 export const ChatProvider = ({ children }) => {

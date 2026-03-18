@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
-import { AuthContext } from './auth-context';
+import { AuthContext } from '.';
 import { apiClient, backendUrl, extractErrorMessage, setAuthToken } from '../src/lib/api';
 
 export const AuthProvider = ({ children }) => {

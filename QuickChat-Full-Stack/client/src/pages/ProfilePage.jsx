@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import assets from '../assets/assets';
-import { useAuth } from '../../context/auth-context';
+import { useAuth } from '../../context';
 import toast from 'react-hot-toast';
 
 const ProfilePage = () => {
