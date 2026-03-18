@@ -1,130 +1,180 @@
-import { createContext, useContext, useEffect, useState } from "react";
-import { AuthContext } from "./AuthContext";
-import toast from "react-hot-toast";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { AuthContext } from './AuthContext';
+import toast from 'react-hot-toast';
 
+const getErrorMessage = (error, fallbackMessage) => {
+  return error.response?.data?.message || error.message || fallbackMessage;
+};
 
 export const ChatContext = createContext();
 
-export const ChatProvider = ({ children })=>{
+export const ChatProvider = ({ children }) => {
+  const [messages, setMessages] = useState([]);
+  const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [unseenMessages, setUnseenMessages] = useState({});
+  const [isTyping, setIsTyping] = useState({});
+  const [typingTimeout, setTypingTimeout] = useState(null);
+  const [isUsersLoading, setIsUsersLoading] = useState(false);
+  const [isMessagesLoading, setIsMessagesLoading] = useState(false);
 
-    const [messages, setMessages] = useState([]);
-    const [users, setUsers] = useState([]);
-    const [selectedUser, setSelectedUser] = useState(null)
-    const [unseenMessages, setUnseenMessages] = useState({})
-    const [isTyping, setIsTyping] = useState({}) // { userId: boolean }
-    const [typingTimeout, setTypingTimeout] = useState(null)
+  const { socket, axios, authUser } = useContext(AuthContext);
 
-    const {socket, axios} = useContext(AuthContext);
+  const getUsers = useCallback(async () => {
+    setIsUsersLoading(true);
+    try {
+      const { data } = await axios.get('/api/messages/users');
+      if (data.success) {
+        setUsers(data.users);
+        setUnseenMessages(data.unseenMessages);
+      }
+    } catch (error) {
+      toast.error(getErrorMessage(error, 'Failed to load users'));
+    } finally {
+      setIsUsersLoading(false);
+    }
+  }, [axios]);
 
-    // function to get all users for sidebar
-    const getUsers = async () =>{
-        try {
-            const { data } = await axios.get("/api/messages/users");
-            if (data.success) {
-                setUsers(data.users)
-                setUnseenMessages(data.unseenMessages)
-            }
-        } catch (error) {
-            toast.error(error.message)
+  const getMessages = useCallback(
+    async (userId) => {
+      if (!userId) {
+        setMessages([]);
+        return;
+      }
+
+      setIsMessagesLoading(true);
+      try {
+        const { data } = await axios.get(`/api/messages/${userId}`);
+        if (data.success) {
+          setMessages(data.messages);
         }
+      } catch (error) {
+        toast.error(getErrorMessage(error, 'Failed to load messages'));
+      } finally {
+        setIsMessagesLoading(false);
+      }
+    },
+    [axios],
+  );
+
+  const sendMessage = useCallback(
+    async (messageData) => {
+      if (!selectedUser?._id) {
+        throw new Error('Please select a user before sending a message');
+      }
+
+      const { data } = await axios.post(`/api/messages/send/${selectedUser._id}`, messageData);
+      if (!data.success) {
+        throw new Error(data.message || 'Failed to send message');
+      }
+
+      setMessages((prevMessages) => [...prevMessages, data.newMessage]);
+      return data.newMessage;
+    },
+    [axios, selectedUser],
+  );
+
+  const markMessageAsSeen = useCallback(
+    async (messageId) => {
+      if (!messageId) return;
+
+      try {
+        await axios.put(`/api/messages/${messageId}/mark-read`);
+      } catch (error) {
+        toast.error(getErrorMessage(error, 'Failed to mark message as read'));
+      }
+    },
+    [axios],
+  );
+
+  useEffect(() => {
+    if (!authUser) {
+      setUsers([]);
+      setMessages([]);
+      setSelectedUser(null);
+      setUnseenMessages({});
+      return;
     }
 
-    // function to get messages for selected user
-    const getMessages = async (userId)=>{
-        try {
-            const { data } = await axios.get(`/api/messages/${userId}`);
-            if (data.success){
-                setMessages(data.messages)
-            }
-        } catch (error) {
-            toast.error(error.message)
-        }
-    }
+    getUsers();
+  }, [authUser, getUsers]);
 
-    // function to send message to selected user
-    const sendMessage = async (messageData)=>{
-        try {
-            const {data} = await axios.post(`/api/messages/send/${selectedUser._id}`, messageData);
-            if(data.success){
-                setMessages((prevMessages)=>[...prevMessages, data.newMessage])
-            }else{
-                toast.error(data.message);
-            }
-        } catch (error) {
-            toast.error(error.message);
-        }
-    }
+  useEffect(() => {
+    if (!socket) return undefined;
 
-    // function to subscribe to messages for selected user
-    const subscribeToMessages = async () => {
-        if (!socket) return;
+    const handleNewMessage = (newMessage) => {
+      if (selectedUser && newMessage.senderId === selectedUser._id) {
+        const nextMessage = { ...newMessage, seen: true };
+        setMessages((prevMessages) => [...prevMessages, nextMessage]);
+        markMessageAsSeen(newMessage._id);
+        return;
+      }
 
-        const handleNewMessage = (newMessage) => {
-            if (selectedUser && newMessage.senderId === selectedUser._id) {
-                newMessage.seen = true;
-                setMessages((prevMessages) => [...prevMessages, newMessage]);
-                axios.put(`/api/messages/mark/${newMessage._id}`);
-            } else {
-                setUnseenMessages((prevUnseenMessages) => ({
-                    ...prevUnseenMessages,
-                    [newMessage.senderId]: prevUnseenMessages[newMessage.senderId] ? prevUnseenMessages[newMessage.senderId] + 1 : 1,
-                }));
-            }
-        };
-
-        const handleTyping = (data) => {
-            if (selectedUser && data.userId === selectedUser._id) {
-                setIsTyping((prev) => ({ ...prev, [data.userId]: true }));
-            }
-        };
-
-        const handleStopTyping = (data) => {
-            if (selectedUser && data.userId === selectedUser._id) {
-                setIsTyping((prev) => ({ ...prev, [data.userId]: false }));
-            }
-        };
-
-        socket.on("newMessage", handleNewMessage);
-        socket.on("typing", handleTyping);
-        socket.on("stopTyping", handleStopTyping);
-
-        // Store the handler references on socket for cleanup as needed
-        socket._handlers = { handleNewMessage, handleTyping, handleStopTyping };
-    }
-
-    // function to unsubscribe from messages
-    const unsubscribeFromMessages = () => {
-        if (!socket || !socket._handlers) return;
-
-        const { handleNewMessage, handleTyping, handleStopTyping } = socket._handlers;
-        socket.off("newMessage", handleNewMessage);
-        socket.off("typing", handleTyping);
-        socket.off("stopTyping", handleStopTyping);
-        delete socket._handlers;
+      setUnseenMessages((prevUnseenMessages) => ({
+        ...prevUnseenMessages,
+        [newMessage.senderId]: (prevUnseenMessages[newMessage.senderId] || 0) + 1,
+      }));
     };
 
-    useEffect(() => {
-        subscribeToMessages();
-        return () => unsubscribeFromMessages();
-    }, [socket, selectedUser]);
+    const handleTyping = ({ userId }) => {
+      if (selectedUser && userId === selectedUser._id) {
+        setIsTyping((prev) => ({ ...prev, [userId]: true }));
+      }
+    };
 
-    // Update document title with unread count
-    useEffect(() => {
-        const totalUnseen = Object.values(unseenMessages).reduce((a, b) => a + (b || 0), 0);
-        if (totalUnseen > 0) {
-            document.title = `Chatify (${totalUnseen} new)`;
-        } else {
-            document.title = 'Chatify';
-        }
-    }, [unseenMessages])
+    const handleStopTyping = ({ userId }) => {
+      if (selectedUser && userId === selectedUser._id) {
+        setIsTyping((prev) => ({ ...prev, [userId]: false }));
+      }
+    };
 
-    const value = {
-        messages, users, selectedUser, getUsers, getMessages, sendMessage, setSelectedUser, unseenMessages, setUnseenMessages, isTyping, typingTimeout, setTypingTimeout
-    }
+    socket.on('newMessage', handleNewMessage);
+    socket.on('typing', handleTyping);
+    socket.on('stopTyping', handleStopTyping);
 
-    return (
-    <ChatContext.Provider value={value}>
-            { children }
-    </ChatContext.Provider>
-    )
-}
+    return () => {
+      socket.off('newMessage', handleNewMessage);
+      socket.off('typing', handleTyping);
+      socket.off('stopTyping', handleStopTyping);
+    };
+  }, [markMessageAsSeen, selectedUser, socket]);
+
+  useEffect(() => {
+    const totalUnseen = Object.values(unseenMessages).reduce((a, b) => a + (b || 0), 0);
+    document.title = totalUnseen > 0 ? `Chatify (${totalUnseen} new)` : 'Chatify';
+  }, [unseenMessages]);
+
+  const value = useMemo(
+    () => ({
+      messages,
+      users,
+      selectedUser,
+      getUsers,
+      getMessages,
+      sendMessage,
+      setSelectedUser,
+      unseenMessages,
+      setUnseenMessages,
+      isTyping,
+      typingTimeout,
+      setTypingTimeout,
+      isUsersLoading,
+      isMessagesLoading,
+    }),
+    [
+      getMessages,
+      getUsers,
+      isMessagesLoading,
+      isTyping,
+      isUsersLoading,
+      messages,
+      selectedUser,
+      sendMessage,
+      typingTimeout,
+      unseenMessages,
+      users,
+    ],
+  );
+
+  return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
+};

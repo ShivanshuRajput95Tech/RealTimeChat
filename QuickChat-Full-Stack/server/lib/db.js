@@ -1,21 +1,21 @@
-import mongoose from "mongoose";
+import mongoose from 'mongoose';
+import config from '../config/env.js';
+import logger from './logger.js';
 
 // Function to connect to the mongodb database
 export const connectDB = async () => {
-    try {
-        mongoose.connection.on('connected', () => console.log('Database Connected'));
+  try {
+    mongoose.connection.on('connected', () => {
+      logger.info('Database connected');
+    });
 
-        const mongoUri = process.env.MONGODB_URI;
-        if (!mongoUri) {
-            throw new Error('MONGODB_URI environment variable is required');
-        }
+    mongoose.connection.on('error', (error) => {
+      logger.error('Database connection error', error);
+    });
 
-        await mongoose.connect(mongoUri, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-    } catch (error) {
-        console.error('Failed to connect to MongoDB:', error);
-        process.exit(1);
-    }
+    await mongoose.connect(config.mongodb.uri);
+  } catch (error) {
+    logger.error('Failed to connect to MongoDB', error);
+    process.exit(1);
+  }
 };

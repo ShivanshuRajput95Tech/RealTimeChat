@@ -1,130 +1,99 @@
-import React, { useContext, useEffect, useMemo, useState } from 'react'
-import assets from '../assets/assets'
-import { ChatContext } from '../../context/ChatContext'
-import { AuthContext } from '../../context/AuthContext'
-import { ThemeContext } from '../../context/ThemeContext'
+import React, { useContext, useMemo } from 'react';
+import assets from '../assets/assets';
+import { ChatContext } from '../../context/ChatContext';
+import { AuthContext } from '../../context/AuthContext';
+import { ThemeContext } from '../../context/ThemeContext';
 
 const RightSidebar = () => {
-  const { selectedUser, messages } = useContext(ChatContext)
-  const { authUser, onlineUsers } = useContext(AuthContext)
-  const { isDark } = useContext(ThemeContext)
+  const { selectedUser, messages } = useContext(ChatContext);
+  const { authUser, onlineUsers } = useContext(AuthContext);
+  const { isDark } = useContext(ThemeContext);
 
-  const msgImages = useMemo(() => messages.filter((msg) => msg.image).map((msg) => msg.image), [messages])
-  
-  const totalMessages = useMemo(() => messages.length, [messages])
-  const myMessageCount = useMemo(() => messages.filter(msg => msg.senderId === authUser._id).length, [messages, authUser])
+  const msgImages = useMemo(() => messages.filter((msg) => msg.image).map((msg) => msg.image), [messages]);
+  const totalMessages = useMemo(() => messages.length, [messages]);
+  const myMessageCount = useMemo(() => messages.filter((msg) => msg.senderId === authUser?._id).length, [authUser?._id, messages]);
 
-  if (!selectedUser) return null
+  if (!selectedUser) return null;
 
-  const isOnline = onlineUsers.includes(selectedUser._id)
-  const joinDate = new Date(selectedUser.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+  const isOnline = onlineUsers.includes(selectedUser._id);
+  const joinDate = selectedUser.createdAt
+    ? new Date(selectedUser.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
+    : 'Unknown';
 
   return (
-    <aside className={`h-full overflow-y-auto flex flex-col ${isDark ? 'bg-gradient-to-b from-slate-900/40 to-slate-950/40 text-white border-white/10' : 'bg-gradient-to-b from-slate-50 to-white text-slate-900 border-slate-300'} p-4 border-l max-md:hidden scrollbar-thin ${isDark ? 'scrollbar-thumb-slate-600 scrollbar-track-slate-800' : 'scrollbar-thumb-slate-300 scrollbar-track-slate-100'}`}>
-      
-      {/* Profile Section */}
-      <div className={`${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'} border rounded-xl p-4 mb-4`}>
-        <div className='flex flex-col items-center gap-3'>
-          <div className='relative group'>
-            <div className={`absolute inset-0 ${isDark ? 'bg-gradient-to-r from-cyan-500 to-blue-500' : 'bg-gradient-to-r from-cyan-400 to-blue-400'} rounded-full blur-lg opacity-50 group-hover:opacity-75 transition`}/>
-            <img
-              src={selectedUser.profilePic || assets.avatar_icon}
-              alt='profile'
-              className='relative w-24 h-24 rounded-full border-4 border-white/20 object-cover shadow-lg'
-            />
-            <div className={`absolute bottom-0 right-0 w-6 h-6 rounded-full border-2 border-white ring-1 ring-white/30 ${isOnline ? (isDark ? 'bg-emerald-500' : 'bg-emerald-400') : (isDark ? 'bg-slate-500' : 'bg-slate-400')}`}/>
-          </div>
-          
-          <div className='text-center'>
-            <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{selectedUser.fullName}</h3>
-            <span className={`text-xs px-3 py-1 rounded-full inline-block mt-2 font-semibold ${
-              isOnline 
-                ? isDark ? 'bg-emerald-500/30 text-emerald-200' : 'bg-emerald-100 text-emerald-700'
-                : isDark ? 'bg-slate-700/40 text-slate-300' : 'bg-slate-200 text-slate-600'
-            }`}>
-              {isOnline ? '🟢 Online' : '⚫ Offline'}
-            </span>
-          </div>
-          
-          {selectedUser.bio && (
-            <p className={`text-sm text-center italic ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>"{selectedUser.bio}"</p>
-          )}
-        </div>
-      </div>
-
-      {/* Stats Section */}
-      <div className={`${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'} border rounded-xl p-4 mb-4`}>
-        <h4 className={`text-xs font-semibold uppercase tracking-wider mb-3 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-          Conversation Stats
-        </h4>
-        <div className='grid grid-cols-2 gap-2'>
-          <div className={`${isDark ? 'bg-slate-700/50' : 'bg-slate-100'} rounded-lg p-2 text-center`}>
-            <p className={`text-2xl font-bold ${isDark ? 'text-blue-400' : 'text-blue-600'}`}>{totalMessages}</p>
-            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Total Messages</p>
-          </div>
-          <div className={`${isDark ? 'bg-slate-700/50' : 'bg-slate-100'} rounded-lg p-2 text-center`}>
-            <p className={`text-2xl font-bold ${isDark ? 'text-purple-400' : 'text-purple-600'}`}>{myMessageCount}</p>
-            <p className={`text-xs ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>Your Messages</p>
+    <aside className={`hidden h-full overflow-y-auto border-l p-4 lg:flex lg:flex-col ${isDark ? 'border-white/10 bg-gradient-to-b from-slate-900/35 to-slate-950/45 text-white' : 'border-slate-200 bg-gradient-to-b from-slate-50 to-white text-slate-900'} scrollbar-thin ${isDark ? 'scrollbar-thumb-slate-600 scrollbar-track-slate-800' : 'scrollbar-thumb-slate-300 scrollbar-track-slate-100'}`}>
+      <div className={`overflow-hidden rounded-[28px] border shadow-xl ${isDark ? 'border-white/10 bg-slate-900/60' : 'border-slate-200 bg-white'}`}>
+        <div className={`h-28 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.35),transparent_45%),radial-gradient(circle_at_80%_30%,rgba(168,85,247,0.4),transparent_40%)] ${isDark ? 'bg-slate-900' : 'bg-slate-100'}`} />
+        <div className='px-5 pb-5'>
+          <div className='-mt-12 flex flex-col items-center gap-3'>
+            <div className='relative'>
+              <img
+                src={selectedUser.profilePic || assets.avatar_icon}
+                alt='profile'
+                className={`h-24 w-24 rounded-[28px] object-cover shadow-2xl ${isDark ? 'border border-white/10' : 'border border-white'}`}
+              />
+              <div className={`absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-2 ${isDark ? 'border-slate-900' : 'border-white'} ${isOnline ? 'bg-emerald-400' : isDark ? 'bg-slate-500' : 'bg-slate-400'}`} />
+            </div>
+            <div className='text-center'>
+              <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{selectedUser.fullName}</h3>
+              <p className={`mt-1 text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{selectedUser.email}</p>
+              <span className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${isOnline ? 'bg-emerald-500/15 text-emerald-400' : isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
+                {isOnline ? 'Active now' : 'Offline'}
+              </span>
+            </div>
+            {selectedUser.bio && (
+              <p className={`rounded-2xl px-3 py-3 text-center text-sm leading-6 ${isDark ? 'bg-white/5 text-slate-300' : 'bg-slate-50 text-slate-600'}`}>
+                “{selectedUser.bio}”
+              </p>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Shared Media Section */}
-      <div className={`${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'} border rounded-xl p-4 mb-4`}>
-        <h4 className={`text-xs font-semibold uppercase tracking-wider mb-3 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-          Shared Media ({msgImages.length})
-        </h4>
+      <div className='mt-4 grid grid-cols-2 gap-3'>
+        {[
+          { label: 'Messages', value: totalMessages, tone: 'text-cyan-400' },
+          { label: 'Sent by you', value: myMessageCount, tone: 'text-violet-400' },
+          { label: 'Shared media', value: msgImages.length, tone: 'text-amber-400' },
+          { label: 'Member since', value: joinDate, tone: isDark ? 'text-slate-200' : 'text-slate-800' },
+        ].map((item) => (
+          <div key={item.label} className={`rounded-2xl border p-3 ${isDark ? 'border-white/8 bg-slate-900/60' : 'border-slate-200 bg-white'}`}>
+            <p className={`text-[11px] uppercase tracking-[0.18em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{item.label}</p>
+            <p className={`mt-2 text-sm font-semibold ${item.tone}`}>{item.value}</p>
+          </div>
+        ))}
+      </div>
+
+      <div className={`mt-4 rounded-[28px] border p-4 ${isDark ? 'border-white/8 bg-slate-900/60' : 'border-slate-200 bg-white'}`}>
+        <div className='flex items-center justify-between'>
+          <h4 className={`text-xs font-semibold uppercase tracking-[0.18em] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+            Shared Media
+          </h4>
+          <span className={`text-[11px] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{msgImages.length} items</span>
+        </div>
+
         {msgImages.length === 0 ? (
-          <div className={`text-center py-4 ${isDark ? 'text-slate-500' : 'text-slate-500'}`}>
-            <p className='text-sm'>📸 No shared photos yet</p>
+          <div className={`mt-4 rounded-2xl px-4 py-6 text-center text-sm ${isDark ? 'bg-white/5 text-slate-400' : 'bg-slate-50 text-slate-500'}`}>
+            📸 No shared photos yet.
           </div>
         ) : (
-          <div className='grid grid-cols-2 gap-2 max-h-32 overflow-y-auto'>
+          <div className='mt-4 grid grid-cols-2 gap-2'>
             {msgImages.slice(0, 6).map((image, index) => (
               <button
                 key={`${image}-${index}`}
                 onClick={() => window.open(image, '_blank')}
-                className={`h-20 overflow-hidden rounded-lg border transition-transform hover:scale-105 cursor-pointer ${isDark ? 'border-white/10 hover:border-white/30' : 'border-slate-300 hover:border-slate-400'}`}
+                className={`group relative h-24 overflow-hidden rounded-2xl border ${isDark ? 'border-white/10' : 'border-slate-200'}`}
                 title='Click to view full image'
+                type='button'
               >
-                <img src={image} alt='shared' className='h-full w-full object-cover' />
+                <img src={image} alt='shared' className='h-full w-full object-cover transition duration-200 group-hover:scale-105' />
               </button>
             ))}
           </div>
         )}
-        {msgImages.length > 6 && (
-          <p className={`text-xs text-center mt-2 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-            +{msgImages.length - 6} more
-          </p>
-        )}
-      </div>
-
-      {/* Info Section */}
-      <div className={`${isDark ? 'bg-slate-800/50 border-slate-700' : 'bg-white border-slate-200'} border rounded-xl p-4 mb-auto`}>
-        <h4 className={`text-xs font-semibold uppercase tracking-wider mb-3 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
-          Profile Info
-        </h4>
-        <div className='space-y-2 text-xs'>
-          <div className='flex justify-between items-center'>
-            <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Member since</span>
-            <span className={`font-semibold ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>{joinDate}</span>
-          </div>
-          <div className='flex justify-between items-center'>
-            <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Status</span>
-            <span className={`font-semibold ${isOnline ? (isDark ? 'text-emerald-400' : 'text-emerald-600') : (isDark ? 'text-slate-400' : 'text-slate-600')}`}>
-              {isOnline ? 'Active Now' : 'Offline'}
-            </span>
-          </div>
-          <div className='flex justify-between items-center'>
-            <span className={isDark ? 'text-slate-400' : 'text-slate-600'}>Email</span>
-            <span className={`font-semibold text-xs truncate ${isDark ? 'text-slate-200' : 'text-slate-900'}`}>
-              {selectedUser.email}
-            </span>
-          </div>
-        </div>
       </div>
     </aside>
-  )
-}
+  );
+};
 
-export default RightSidebar
+export default RightSidebar;

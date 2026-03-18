@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # MongoDB Database
   mongodb:
     image: mongo:6-alpine
     container_name: realtimechat-mongo
@@ -22,7 +21,6 @@ services:
     networks:
       - realtimechat-net
 
-  # Redis Cache
   redis:
     image: redis:7-alpine
     container_name: realtimechat-redis
@@ -39,10 +37,9 @@ services:
     networks:
       - realtimechat-net
 
-  # Backend API Server
   backend:
     build:
-      context: ./server
+      context: ./QuickChat-Full-Stack/server
       dockerfile: Dockerfile
     container_name: realtimechat-api
     ports:
@@ -65,29 +62,27 @@ services:
       redis:
         condition: service_healthy
     volumes:
-      - ./server:/app
+      - ./QuickChat-Full-Stack/server:/app
       - /app/node_modules
     command: npm run dev
     networks:
       - realtimechat-net
     restart: unless-stopped
 
-  # Frontend Development Server
   frontend:
-    build:
-      context: ./client
-      dockerfile: Dockerfile
+    image: node:20-alpine
+    working_dir: /app
     container_name: realtimechat-web
     ports:
       - "5173:5173"
     environment:
-      VITE_API_URL: http://localhost:5000
+      VITE_BACKEND_URL: http://localhost:5000
     volumes:
-      - ./client:/app
+      - ./QuickChat-Full-Stack/client:/app
       - /app/node_modules
     depends_on:
       - backend
-    command: npm run dev
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     networks:
       - realtimechat-net
     restart: unless-stopped
