@@ -1,10 +1,10 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import StatusBadge from './StatusBadge';
 import assets from '../../assets/assets';
-import { ThemeContext } from '../../../context/ThemeContext';
+import { useTheme } from '../../../context/theme-context';
 
 const UserCard = ({ user, onSelect, selected, online, unseen }) => {
-  const { isDark } = useContext(ThemeContext);
+  const { isDark } = useTheme();
 
   return (
     <button

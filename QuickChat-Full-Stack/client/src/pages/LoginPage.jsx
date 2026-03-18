@@ -1,6 +1,6 @@
-import React, { useContext, useState } from 'react';
+import React, { useState } from 'react';
 import assets from '../assets/assets';
-import { AuthContext } from '../../context/AuthContext';
+import { useAuth } from '../../context/auth-context';
 import toast from 'react-hot-toast';
 
 const LoginPage = () => {
@@ -12,7 +12,7 @@ const LoginPage = () => {
   const [isDataSubmitted, setIsDataSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
 
-  const { login } = useContext(AuthContext);
+  const { login } = useAuth();
 
   const onSubmitHandler = async (event) => {
     event.preventDefault();

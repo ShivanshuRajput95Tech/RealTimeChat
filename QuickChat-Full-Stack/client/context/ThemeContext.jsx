@@ -1,6 +1,5 @@
-import { createContext, useEffect, useMemo, useState, useCallback } from 'react';
-
-export const ThemeContext = createContext();
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { ThemeContext } from './theme-context';
 
 export const ThemeProvider = ({ children }) => {
   const [isDark, setIsDark] = useState(() => {

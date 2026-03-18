@@ -1,8 +1,8 @@
-import React, { useContext, useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import assets from '../assets/assets';
-import { ChatContext } from '../../context/ChatContext';
-import { AuthContext } from '../../context/AuthContext';
-import { ThemeContext } from '../../context/ThemeContext';
+import { useChat } from '../../context/chat-context';
+import { useAuth } from '../../context/auth-context';
+import { useTheme } from '../../context/theme-context';
 import MessageBubble from './ui/MessageBubble';
 import TypingIndicator from './ui/TypingIndicator';
 import toast from 'react-hot-toast';
@@ -18,9 +18,9 @@ const ChatContainer = () => {
     typingTimeout,
     setTypingTimeout,
     isMessagesLoading,
-  } = useContext(ChatContext);
-  const { authUser, onlineUsers, socket } = useContext(AuthContext);
-  const { isDark } = useContext(ThemeContext);
+  } = useChat();
+  const { authUser, onlineUsers, socket } = useAuth();
+  const { isDark } = useTheme();
 
   const scrollEnd = useRef(null);
   const [input, setInput] = useState('');

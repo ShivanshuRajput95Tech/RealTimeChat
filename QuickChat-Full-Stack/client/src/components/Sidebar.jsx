@@ -1,8 +1,8 @@
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../../context/AuthContext';
-import { ChatContext } from '../../context/ChatContext';
-import { ThemeContext } from '../../context/ThemeContext';
+import { useAuth } from '../../context/auth-context';
+import { useChat } from '../../context/chat-context';
+import { useTheme } from '../../context/theme-context';
 import UserCard from './ui/UserCard';
 
 const Sidebar = () => {
@@ -13,10 +13,10 @@ const Sidebar = () => {
     unseenMessages,
     setUnseenMessages,
     isUsersLoading,
-  } = useContext(ChatContext);
+  } = useChat();
 
-  const { authUser, logout, onlineUsers } = useContext(AuthContext);
-  const { isDark, toggleTheme } = useContext(ThemeContext);
+  const { authUser, logout, onlineUsers } = useAuth();
+  const { isDark, toggleTheme } = useTheme();
 
   const [query, setQuery] = useState('');
   const [showDashboard, setShowDashboard] = useState(false);

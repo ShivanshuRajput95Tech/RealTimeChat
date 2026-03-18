@@ -1,10 +1,10 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { formatMessageTime } from '../../lib/utils';
 import assets from '../../assets/assets';
-import { ThemeContext } from '../../../context/ThemeContext';
+import { useTheme } from '../../../context/theme-context';
 
 const MessageBubble = ({ msg, isMine, peerAvatar, myAvatar }) => {
-  const { isDark } = useContext(ThemeContext);
+  const { isDark } = useTheme();
   const showImage = msg.image && msg.image.trim() !== '';
   const showText = msg.text && msg.text.trim() !== '';
 

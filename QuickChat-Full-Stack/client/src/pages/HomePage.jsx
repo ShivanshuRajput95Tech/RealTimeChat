@@ -1,13 +1,13 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import Sidebar from '../components/Sidebar';
 import ChatContainer from '../components/ChatContainer';
 import RightSidebar from '../components/RightSidebar';
-import { ChatContext } from '../../context/ChatContext';
-import { ThemeContext } from '../../context/ThemeContext';
+import { useChat } from '../../context/chat-context';
+import { useTheme } from '../../context/theme-context';
 
 const HomePage = () => {
-  const { selectedUser } = useContext(ChatContext);
-  const { isDark } = useContext(ThemeContext);
+  const { selectedUser } = useChat();
+  const { isDark } = useTheme();
 
   return (
     <main className={`min-h-screen p-3 sm:p-5 ${isDark ? 'bg-[radial-gradient(circle_at_top_left,rgba(56,189,248,0.15),transparent_30%),radial-gradient(circle_at_80%_20%,rgba(139,92,246,0.16),transparent_38%),linear-gradient(160deg,#020617,#0f172a_42%,#111827)]' : 'bg-[radial-gradient(circle_at_top_left,rgba(125,211,252,0.35),transparent_35%),radial-gradient(circle_at_80%_20%,rgba(196,181,253,0.45),transparent_38%),linear-gradient(180deg,#f8fafc,#eef2ff)]'}`}>

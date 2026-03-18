@@ -1,20 +1,8 @@
-import { createContext, useCallback, useEffect, useMemo, useState } from 'react';
-import axios from 'axios';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
-
-const backendUrl = import.meta.env.VITE_BACKEND_URL || import.meta.env.VITE_API_URL;
-if (!backendUrl) {
-  console.warn('VITE_BACKEND_URL or VITE_API_URL must be set in client .env');
-}
-
-axios.defaults.baseURL = backendUrl;
-
-const getErrorMessage = (error, fallbackMessage) => {
-  return error.response?.data?.message || error.message || fallbackMessage;
-};
-
-export const AuthContext = createContext();
+import { AuthContext } from './auth-context';
+import { apiClient, backendUrl, extractErrorMessage, setAuthToken } from '../src/lib/api';
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem('token'));
@@ -33,42 +21,48 @@ export const AuthProvider = ({ children }) => {
     });
   }, []);
 
-  const connectSocket = useCallback(
-    (userData, authToken) => {
-      const resolvedToken = authToken || localStorage.getItem('token');
-      if (!userData || !resolvedToken || !backendUrl) {
-        return;
+  const connectSocket = useCallback((userData, authToken) => {
+    const resolvedToken = authToken || localStorage.getItem('token');
+    if (!userData || !resolvedToken || !backendUrl) {
+      return;
+    }
+
+    setSocket((currentSocket) => {
+      if (currentSocket?.connected && currentSocket.auth?.token === `Bearer ${resolvedToken}`) {
+        return currentSocket;
       }
 
-      setSocket((currentSocket) => {
-        if (currentSocket?.connected && currentSocket.auth?.token === `Bearer ${resolvedToken}`) {
-          return currentSocket;
-        }
+      if (currentSocket) {
+        currentSocket.removeAllListeners();
+        currentSocket.disconnect();
+      }
 
-        if (currentSocket) {
-          currentSocket.removeAllListeners();
-          currentSocket.disconnect();
-        }
-
-        const nextSocket = io(backendUrl, {
-          auth: {
-            token: `Bearer ${resolvedToken}`,
-          },
-        });
-
-        nextSocket.on('getOnlineUsers', (userIds) => {
-          setOnlineUsers(userIds);
-        });
-
-        nextSocket.on('connect_error', (error) => {
-          toast.error(`Socket error: ${error.message}`);
-        });
-
-        return nextSocket;
+      const nextSocket = io(backendUrl, {
+        auth: {
+          token: `Bearer ${resolvedToken}`,
+        },
       });
-    },
-    [],
-  );
+
+      nextSocket.on('getOnlineUsers', (userIds) => {
+        setOnlineUsers(userIds);
+      });
+
+      nextSocket.on('connect_error', (error) => {
+        toast.error(`Socket error: ${error.message}`);
+      });
+
+      return nextSocket;
+    });
+  }, []);
+
+  const resetAuthState = useCallback(() => {
+    localStorage.removeItem('token');
+    setToken(null);
+    setAuthUser(null);
+    setOnlineUsers([]);
+    setAuthToken(null);
+    disconnectSocket();
+  }, [disconnectSocket]);
 
   const checkAuth = useCallback(async () => {
     if (!token) {
@@ -77,60 +71,48 @@ export const AuthProvider = ({ children }) => {
     }
 
     try {
-      axios.defaults.headers.common.Authorization = `Bearer ${token}`;
-      const { data } = await axios.get('/api/auth/check');
+      setAuthToken(token);
+      const { data } = await apiClient.get('/api/auth/check');
       if (data.success) {
         setAuthUser(data.user);
         connectSocket(data.user, token);
       }
     } catch (error) {
-      localStorage.removeItem('token');
-      setToken(null);
-      setAuthUser(null);
-      delete axios.defaults.headers.common.Authorization;
-      toast.error(getErrorMessage(error, 'Authentication check failed'));
+      resetAuthState();
+      toast.error(extractErrorMessage(error, 'Authentication check failed'));
     } finally {
       setIsCheckingAuth(false);
     }
-  }, [connectSocket, token]);
+  }, [connectSocket, resetAuthState, token]);
 
-  const login = useCallback(
-    async (state, credentials) => {
-      try {
-        const { data } = await axios.post(`/api/auth/${state}`, credentials);
-        if (!data.success) {
-          throw new Error(data.message || 'Authentication failed');
-        }
-
-        setAuthUser(data.userData);
-        setToken(data.token);
-        localStorage.setItem('token', data.token);
-        axios.defaults.headers.common.Authorization = `Bearer ${data.token}`;
-        connectSocket(data.userData, data.token);
-        toast.success(data.message);
-        return data.userData;
-      } catch (error) {
-        const message = getErrorMessage(error, 'Authentication failed');
-        toast.error(message);
-        throw error;
+  const login = useCallback(async (state, credentials) => {
+    try {
+      const { data } = await apiClient.post(`/api/auth/${state}`, credentials);
+      if (!data.success) {
+        throw new Error(data.message || 'Authentication failed');
       }
-    },
-    [connectSocket],
-  );
+
+      setAuthUser(data.userData);
+      setToken(data.token);
+      localStorage.setItem('token', data.token);
+      setAuthToken(data.token);
+      connectSocket(data.userData, data.token);
+      toast.success(data.message);
+      return data.userData;
+    } catch (error) {
+      toast.error(extractErrorMessage(error, 'Authentication failed'));
+      throw error;
+    }
+  }, [connectSocket]);
 
   const logout = useCallback(() => {
-    localStorage.removeItem('token');
-    setToken(null);
-    setAuthUser(null);
-    setOnlineUsers([]);
-    delete axios.defaults.headers.common.Authorization;
-    disconnectSocket();
+    resetAuthState();
     toast.success('Logged out successfully');
-  }, [disconnectSocket]);
+  }, [resetAuthState]);
 
   const updateProfile = useCallback(async (body) => {
     try {
-      const { data } = await axios.put('/api/auth/update-profile', body);
+      const { data } = await apiClient.put('/api/auth/update-profile', body);
       if (!data.success) {
         throw new Error(data.message || 'Profile update failed');
       }
@@ -139,37 +121,31 @@ export const AuthProvider = ({ children }) => {
       toast.success('Profile updated successfully');
       return data.user;
     } catch (error) {
-      const message = getErrorMessage(error, 'Profile update failed');
-      toast.error(message);
+      toast.error(extractErrorMessage(error, 'Profile update failed'));
       throw error;
     }
   }, []);
 
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common.Authorization = `Bearer ${token}`;
+      setAuthToken(token);
     }
     checkAuth();
   }, [checkAuth, token]);
 
-  useEffect(() => {
-    return () => disconnectSocket();
-  }, [disconnectSocket]);
+  useEffect(() => () => disconnectSocket(), [disconnectSocket]);
 
-  const value = useMemo(
-    () => ({
-      axios,
-      authUser,
-      onlineUsers,
-      socket,
-      token,
-      isCheckingAuth,
-      login,
-      logout,
-      updateProfile,
-    }),
-    [authUser, isCheckingAuth, login, logout, onlineUsers, socket, token, updateProfile],
-  );
+  const value = useMemo(() => ({
+    apiClient,
+    authUser,
+    onlineUsers,
+    socket,
+    token,
+    isCheckingAuth,
+    login,
+    logout,
+    updateProfile,
+  }), [authUser, isCheckingAuth, login, logout, onlineUsers, socket, token, updateProfile]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -1,13 +1,13 @@
-import React, { useContext, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import assets from '../assets/assets';
-import { ChatContext } from '../../context/ChatContext';
-import { AuthContext } from '../../context/AuthContext';
-import { ThemeContext } from '../../context/ThemeContext';
+import { useChat } from '../../context/chat-context';
+import { useAuth } from '../../context/auth-context';
+import { useTheme } from '../../context/theme-context';
 
 const RightSidebar = () => {
-  const { selectedUser, messages } = useContext(ChatContext);
-  const { authUser, onlineUsers } = useContext(AuthContext);
-  const { isDark } = useContext(ThemeContext);
+  const { selectedUser, messages } = useChat();
+  const { authUser, onlineUsers } = useAuth();
+  const { isDark } = useTheme();
 
   const msgImages = useMemo(() => messages.filter((msg) => msg.image).map((msg) => msg.image), [messages]);
   const totalMessages = useMemo(() => messages.length, [messages]);

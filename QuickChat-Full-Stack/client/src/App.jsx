@@ -1,13 +1,13 @@
-import React, { useContext } from 'react';
+import React from 'react';
 import { Navigate, Route, Routes } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import LoginPage from './pages/LoginPage';
 import ProfilePage from './pages/ProfilePage';
 import { Toaster } from 'react-hot-toast';
-import { AuthContext } from '../context/AuthContext';
+import { useAuth } from '../context/auth-context';
 
 const App = () => {
-  const { authUser, isCheckingAuth } = useContext(AuthContext);
+  const { authUser, isCheckingAuth } = useAuth();
 
   if (isCheckingAuth) {
     return (

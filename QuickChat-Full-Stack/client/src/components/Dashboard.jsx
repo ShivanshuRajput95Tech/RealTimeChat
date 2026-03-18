@@ -1,12 +1,12 @@
-import React, { useContext, useMemo } from 'react'
-import { ChatContext } from '../../context/ChatContext'
-import { AuthContext } from '../../context/AuthContext'
-import { ThemeContext } from '../../context/ThemeContext'
+import React, { useMemo } from 'react'
+import { useChat } from '../../context/chat-context'
+import { useAuth } from '../../context/auth-context'
+import { useTheme } from '../../context/theme-context'
 
 const Dashboard = () => {
-  const { users, messages, unseenMessages } = useContext(ChatContext)
-  const { authUser, onlineUsers } = useContext(AuthContext)
-  const { isDark } = useContext(ThemeContext)
+  const { users, messages, unseenMessages } = useChat()
+  const { authUser, onlineUsers } = useAuth()
+  const { isDark } = useTheme()
 
   // Calculate statistics
   const stats = useMemo(() => {

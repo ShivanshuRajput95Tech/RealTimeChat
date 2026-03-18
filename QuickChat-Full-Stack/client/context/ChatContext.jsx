@@ -1,12 +1,8 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { AuthContext } from './AuthContext';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-
-const getErrorMessage = (error, fallbackMessage) => {
-  return error.response?.data?.message || error.message || fallbackMessage;
-};
-
-export const ChatContext = createContext();
+import { ChatContext } from './chat-context';
+import { useAuth } from './auth-context';
+import { extractErrorMessage } from '../src/lib/api';
 
 export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
@@ -18,74 +14,65 @@ export const ChatProvider = ({ children }) => {
   const [isUsersLoading, setIsUsersLoading] = useState(false);
   const [isMessagesLoading, setIsMessagesLoading] = useState(false);
 
-  const { socket, axios, authUser } = useContext(AuthContext);
+  const { socket, apiClient, authUser } = useAuth();
 
   const getUsers = useCallback(async () => {
     setIsUsersLoading(true);
     try {
-      const { data } = await axios.get('/api/messages/users');
+      const { data } = await apiClient.get('/api/messages/users');
       if (data.success) {
         setUsers(data.users);
         setUnseenMessages(data.unseenMessages);
       }
     } catch (error) {
-      toast.error(getErrorMessage(error, 'Failed to load users'));
+      toast.error(extractErrorMessage(error, 'Failed to load users'));
     } finally {
       setIsUsersLoading(false);
     }
-  }, [axios]);
+  }, [apiClient]);
 
-  const getMessages = useCallback(
-    async (userId) => {
-      if (!userId) {
-        setMessages([]);
-        return;
+  const getMessages = useCallback(async (userId) => {
+    if (!userId) {
+      setMessages([]);
+      return;
+    }
+
+    setIsMessagesLoading(true);
+    try {
+      const { data } = await apiClient.get(`/api/messages/${userId}`);
+      if (data.success) {
+        setMessages(data.messages);
       }
+    } catch (error) {
+      toast.error(extractErrorMessage(error, 'Failed to load messages'));
+    } finally {
+      setIsMessagesLoading(false);
+    }
+  }, [apiClient]);
 
-      setIsMessagesLoading(true);
-      try {
-        const { data } = await axios.get(`/api/messages/${userId}`);
-        if (data.success) {
-          setMessages(data.messages);
-        }
-      } catch (error) {
-        toast.error(getErrorMessage(error, 'Failed to load messages'));
-      } finally {
-        setIsMessagesLoading(false);
-      }
-    },
-    [axios],
-  );
+  const sendMessage = useCallback(async (messageData) => {
+    if (!selectedUser?._id) {
+      throw new Error('Please select a user before sending a message');
+    }
 
-  const sendMessage = useCallback(
-    async (messageData) => {
-      if (!selectedUser?._id) {
-        throw new Error('Please select a user before sending a message');
-      }
+    const { data } = await apiClient.post(`/api/messages/send/${selectedUser._id}`, messageData);
+    if (!data.success) {
+      throw new Error(data.message || 'Failed to send message');
+    }
 
-      const { data } = await axios.post(`/api/messages/send/${selectedUser._id}`, messageData);
-      if (!data.success) {
-        throw new Error(data.message || 'Failed to send message');
-      }
+    setMessages((prevMessages) => [...prevMessages, data.newMessage]);
+    return data.newMessage;
+  }, [apiClient, selectedUser]);
 
-      setMessages((prevMessages) => [...prevMessages, data.newMessage]);
-      return data.newMessage;
-    },
-    [axios, selectedUser],
-  );
+  const markMessageAsSeen = useCallback(async (messageId) => {
+    if (!messageId) return;
 
-  const markMessageAsSeen = useCallback(
-    async (messageId) => {
-      if (!messageId) return;
-
-      try {
-        await axios.put(`/api/messages/${messageId}/mark-read`);
-      } catch (error) {
-        toast.error(getErrorMessage(error, 'Failed to mark message as read'));
-      }
-    },
-    [axios],
-  );
+    try {
+      await apiClient.put(`/api/messages/${messageId}/mark-read`);
+    } catch (error) {
+      toast.error(extractErrorMessage(error, 'Failed to mark message as read'));
+    }
+  }, [apiClient]);
 
   useEffect(() => {
     if (!authUser) {
@@ -144,37 +131,34 @@ export const ChatProvider = ({ children }) => {
     document.title = totalUnseen > 0 ? `Chatify (${totalUnseen} new)` : 'Chatify';
   }, [unseenMessages]);
 
-  const value = useMemo(
-    () => ({
-      messages,
-      users,
-      selectedUser,
-      getUsers,
-      getMessages,
-      sendMessage,
-      setSelectedUser,
-      unseenMessages,
-      setUnseenMessages,
-      isTyping,
-      typingTimeout,
-      setTypingTimeout,
-      isUsersLoading,
-      isMessagesLoading,
-    }),
-    [
-      getMessages,
-      getUsers,
-      isMessagesLoading,
-      isTyping,
-      isUsersLoading,
-      messages,
-      selectedUser,
-      sendMessage,
-      typingTimeout,
-      unseenMessages,
-      users,
-    ],
-  );
+  const value = useMemo(() => ({
+    messages,
+    users,
+    selectedUser,
+    getUsers,
+    getMessages,
+    sendMessage,
+    setSelectedUser,
+    unseenMessages,
+    setUnseenMessages,
+    isTyping,
+    typingTimeout,
+    setTypingTimeout,
+    isUsersLoading,
+    isMessagesLoading,
+  }), [
+    getMessages,
+    getUsers,
+    isMessagesLoading,
+    isTyping,
+    isUsersLoading,
+    messages,
+    selectedUser,
+    sendMessage,
+    typingTimeout,
+    unseenMessages,
+    users,
+  ]);
 
   return <ChatContext.Provider value={value}>{children}</ChatContext.Provider>;
 };
