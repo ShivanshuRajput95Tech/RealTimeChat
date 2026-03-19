@@ -1,12 +1,38 @@
-# React + Vite
+# RealTimeChat Client
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This is the frontend for RealTimeChat, built with React, Vite, Tailwind CSS, Axios, and Socket.IO Client.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+```bash
+npm install
+cp .env.example .env
+npm run dev
+```
 
-## Expanding the ESLint configuration
+Default local URL: `http://localhost:5173`
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Environment variables
+
+Create `QuickChat-Full-Stack/client/.env`:
+
+```env
+VITE_BACKEND_URL=http://localhost:5000
+# Optional legacy alias:
+# VITE_API_URL=http://localhost:5000
+```
+
+## Available scripts
+
+- `npm run dev` — start the Vite dev server
+- `npm run build` — create a production build
+- `npm run lint` — run ESLint
+- `npm run preview` — preview the production build locally
+
+## Integration notes
+
+- REST requests are sent to the backend base URL configured in `VITE_BACKEND_URL`.
+- Socket.IO connections use the same backend base URL and authenticate with the JWT access token.
+- The client now centralizes route contracts in `src/lib/api.js` via `apiPaths`, keeping auth, search, message, read-receipt, AI, and status endpoints synchronized with the backend.
+- Sidebar search is backed by the authenticated `/api/auth/search` endpoint and supports name, email, and bio queries.
+- The current UI is responsive and theme-aware while preserving the existing backend contract for auth, messages, profile updates, read receipts, and AI-assisted chat actions.

@@ -3,21 +3,18 @@
 
 import Message from '../models/Message.js';
 import User from '../models/User.js';
-import { NotFoundError, ValidationError } from '../lib/errors.js';
+import { ForbiddenError, NotFoundError } from '../lib/errors.js';
 import logger from '../lib/logger.js';
 import cloudinary from '../lib/cloudinary.js';
+import { validateObjectId } from '../lib/validators.js';
 
 export class MessageService {
   static async getUsersForSidebar(userId) {
     logger.debug('Fetching users for sidebar', { userId });
 
     try {
-      // Get all users except current user
-      const users = await User.find({ _id: { $ne: userId } })
-        .select('-password')
-        .lean();
+      const users = await User.find({ _id: { $ne: userId } }).select('-password').lean();
 
-      // Get unseen message counts using aggregation
       const unseenCounts = await Message.aggregate([
         {
           $match: {
@@ -39,7 +36,6 @@ export class MessageService {
       }, {});
 
       logger.debug('Users fetched successfully', { userId, count: users.length });
-
       return { users, unseenMessages };
     } catch (error) {
       logger.error('Error fetching users', error, { userId });
@@ -48,32 +44,28 @@ export class MessageService {
   }
 
   static async getMessages(userId, otherUserId, page = 1, limit = 50) {
-    logger.debug('Fetching messages', { userId, otherUserId, page, limit });
+    const validatedOtherUserId = validateObjectId(otherUserId, 'selectedUserId');
+    logger.debug('Fetching messages', { userId, otherUserId: validatedOtherUserId, page, limit });
 
     try {
       const skip = (page - 1) * limit;
-
       const query = {
         $or: [
-          { senderId: userId, receiverId: otherUserId },
-          { senderId: otherUserId, receiverId: userId },
+          { senderId: userId, receiverId: validatedOtherUserId },
+          { senderId: validatedOtherUserId, receiverId: userId },
         ],
       };
 
-      // Get total count
       const total = await Message.countDocuments(query);
-
-      // Get messages with pagination
       const messages = await Message.find(query)
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
         .lean();
 
-      // Mark messages as seen
       await Message.updateMany(
         {
-          senderId: otherUserId,
+          senderId: validatedOtherUserId,
           receiverId: userId,
           seen: false,
         },
@@ -82,7 +74,7 @@ export class MessageService {
 
       logger.debug('Messages fetched successfully', {
         userId,
-        otherUserId,
+        otherUserId: validatedOtherUserId,
         count: messages.length,
         total,
       });
@@ -97,19 +89,19 @@ export class MessageService {
         },
       };
     } catch (error) {
-      logger.error('Error fetching messages', error, { userId, otherUserId });
+      logger.error('Error fetching messages', error, { userId, otherUserId: validatedOtherUserId });
       throw error;
     }
   }
 
   static async sendMessage(senderId, receiverId, messageData) {
+    const validatedReceiverId = validateObjectId(receiverId, 'receiverId');
     const { text, image } = messageData;
 
-    logger.debug('Sending message', { senderId, receiverId, hasImage: !!image });
+    logger.debug('Sending message', { senderId, receiverId: validatedReceiverId, hasImage: !!image });
 
     try {
-      // Verify receiver exists
-      const receiver = await User.findById(receiverId);
+      const receiver = await User.findById(validatedReceiverId);
       if (!receiver) {
         throw new NotFoundError('Recipient');
       }
@@ -123,10 +115,9 @@ export class MessageService {
         imageUrl = uploadResponse.secure_url;
       }
 
-      // Create message
       const message = await Message.create({
         senderId,
-        receiverId,
+        receiverId: validatedReceiverId,
         text,
         image: imageUrl,
         seen: false,
@@ -135,12 +126,12 @@ export class MessageService {
       logger.info('Message sent successfully', {
         messageId: message._id,
         senderId,
-        receiverId,
+        receiverId: validatedReceiverId,
       });
 
       return message;
     } catch (error) {
-      logger.error('Error sending message', error, { senderId, receiverId });
+      logger.error('Error sending message', error, { senderId, receiverId: validatedReceiverId });
       throw error;
     }
   }
@@ -149,13 +140,12 @@ export class MessageService {
     logger.debug('Editing message', { messageId, userId });
 
     try {
-      const message = await Message.findById(messageId);
+      const message = await Message.findById(validateObjectId(messageId, 'messageId'));
       if (!message) {
         throw new NotFoundError('Message');
       }
-
       if (message.senderId.toString() !== userId.toString()) {
-        throw new Error('Unauthorized');
+        throw new ForbiddenError('You can only edit your own messages');
       }
 
       message.text = text;
@@ -163,7 +153,6 @@ export class MessageService {
       await message.save();
 
       logger.info('Message edited successfully', { messageId, userId });
-
       return message;
     } catch (error) {
       logger.error('Error editing message', error, { messageId, userId });
@@ -175,20 +164,18 @@ export class MessageService {
     logger.debug('Deleting message', { messageId, userId });
 
     try {
-      const message = await Message.findById(messageId);
+      const message = await Message.findById(validateObjectId(messageId, 'messageId'));
       if (!message) {
         throw new NotFoundError('Message');
       }
-
       if (message.senderId.toString() !== userId.toString()) {
-        throw new Error('Unauthorized');
+        throw new ForbiddenError('You can only delete your own messages');
       }
 
       message.deletedAt = new Date();
       await message.save();
 
       logger.info('Message deleted successfully', { messageId, userId });
-
       return message;
     } catch (error) {
       logger.error('Error deleting message', error, { messageId, userId });
@@ -196,11 +183,23 @@ export class MessageService {
     }
   }
 
-  static async markMessageAsRead(messageId) {
+  static async markMessageAsRead(messageId, userId) {
+    const validatedMessageId = validateObjectId(messageId, 'messageId');
+
     try {
-      await Message.findByIdAndUpdate(messageId, { seen: true });
+      const message = await Message.findById(validatedMessageId);
+      if (!message) {
+        throw new NotFoundError('Message');
+      }
+      if (message.receiverId.toString() !== userId.toString()) {
+        throw new ForbiddenError('You can only mark your own received messages as read');
+      }
+
+      message.seen = true;
+      await message.save();
+      return message;
     } catch (error) {
-      logger.error('Error marking message as read', error, { messageId });
+      logger.error('Error marking message as read', error, { messageId: validatedMessageId, userId });
       throw error;
     }
   }

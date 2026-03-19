@@ -93,25 +93,32 @@ export class UserService {
     }
   }
 
-  static async searchUsers(query, limit = 20) {
-    logger.debug('Searching users', { query });
+  static async searchUsers(query, limit = 20, excludeUserId = null) {
+    logger.debug('Searching users', { query, excludeUserId });
 
     try {
-      const users = await User.find({
+      const searchCriteria = {
         $or: [
           { fullName: { $regex: query, $options: 'i' } },
           { email: { $regex: query, $options: 'i' } },
+          { bio: { $regex: query, $options: 'i' } },
         ],
-      })
+      };
+
+      if (excludeUserId) {
+        searchCriteria._id = { $ne: excludeUserId };
+      }
+
+      const users = await User.find(searchCriteria)
         .select('-password')
         .limit(limit)
         .lean();
 
-      logger.debug('Users searched successfully', { query, count: users.length });
+      logger.debug('Users searched successfully', { query, count: users.length, excludeUserId });
 
       return users.map((user) => UserService.formatUserResponse(user));
     } catch (error) {
-      logger.error('Error searching users', error, { query });
+      logger.error('Error searching users', error, { query, excludeUserId });
       throw error;
     }
   }
