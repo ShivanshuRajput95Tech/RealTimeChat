@@ -1,6 +1,7 @@
 import React, { useMemo } from 'react';
 import assets from '../assets/assets';
 import { useAuth, useChat, useTheme } from '../../context';
+import AIAssistantPanel from './AIAssistantPanel';
 
 const RightSidebar = () => {
   const { selectedUser, messages } = useChat();
@@ -60,6 +61,13 @@ const RightSidebar = () => {
             <p className={`mt-2 text-sm font-semibold ${item.tone}`}>{item.value}</p>
           </div>
         ))}
+      </div>
+
+      <div className='mt-4'>
+        <AIAssistantPanel
+          selectedUser={selectedUser}
+          messages={messages}
+        />
       </div>
 
       <div className={`mt-4 rounded-[28px] border p-4 ${isDark ? 'border-white/8 bg-slate-900/60' : 'border-slate-200 bg-white'}`}>

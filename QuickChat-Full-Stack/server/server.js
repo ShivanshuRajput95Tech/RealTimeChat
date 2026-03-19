@@ -9,6 +9,7 @@ import logger from './lib/logger.js';
 import config from './config/env.js';
 import userRouter from './routes/userRoutes.js';
 import messageRouter from './routes/messageRoutes.js';
+import aiRouter from './routes/aiRoutes.js';
 import { Server } from 'socket.io';
 
 const app = express();
@@ -109,10 +110,19 @@ app.use((req, res, next) => {
 });
 
 app.get('/api/status', (req, res) => {
-  res.json({ success: true, message: 'Server is live', timestamp: new Date().toISOString() });
+  res.json({
+    success: true,
+    message: 'Server is live',
+    timestamp: new Date().toISOString(),
+    services: {
+      realtime: true,
+      ai: true,
+    },
+  });
 });
 app.use('/api/auth', userRouter);
 app.use('/api/messages', messageRouter);
+app.use('/api/ai', aiRouter);
 
 app.use((req, res) => {
   res.status(404).json({

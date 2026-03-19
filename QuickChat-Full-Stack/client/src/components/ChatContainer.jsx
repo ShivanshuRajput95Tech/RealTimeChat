@@ -3,6 +3,7 @@ import assets from '../assets/assets';
 import { useAuth, useChat, useTheme } from '../../context';
 import MessageBubble from './ui/MessageBubble';
 import TypingIndicator from './ui/TypingIndicator';
+import AIAssistantPanel from './AIAssistantPanel';
 import toast from 'react-hot-toast';
 
 const ChatContainer = () => {
@@ -23,6 +24,10 @@ const ChatContainer = () => {
   const scrollEnd = useRef(null);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
+
+  const handleSuggestionPick = (suggestion) => {
+    setInput(suggestion);
+  };
 
   const handleSendMessage = async (e) => {
     e.preventDefault();
@@ -226,6 +231,15 @@ const ChatContainer = () => {
         className={`border-t px-4 py-3 backdrop-blur-xl ${isDark ? 'border-white/10 bg-slate-900/75' : 'border-slate-200 bg-white/90'}`}
       >
         <div className='mx-auto flex max-w-4xl flex-col gap-2'>
+          <div className='lg:hidden'>
+            <AIAssistantPanel
+              selectedUser={selectedUser}
+              messages={messages}
+              onSuggestionPick={handleSuggestionPick}
+              compact
+            />
+          </div>
+
           <div className='flex items-center gap-2'>
             <label
               htmlFor='image'
@@ -244,7 +258,7 @@ const ChatContainer = () => {
                 value={input}
                 onChange={handleInputChange}
                 className={`flex-1 bg-transparent px-1 py-1 text-sm outline-none ${isDark ? 'text-white placeholder-slate-400' : 'text-slate-900 placeholder-slate-500'}`}
-                placeholder='Write a message...'
+                placeholder='Write a message or use AI suggestions...'
                 disabled={loading}
               />
               <button
