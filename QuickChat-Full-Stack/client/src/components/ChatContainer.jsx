@@ -116,19 +116,19 @@ const ChatContainer = () => {
     return (
       <main className={`relative flex h-full flex-col items-center justify-center overflow-hidden px-6 text-center ${isDark ? 'bg-slate-950/30' : 'bg-slate-100/80'}`}>
         <div className={`absolute inset-0 opacity-70 ${isDark ? 'bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.16),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(168,85,247,0.18),transparent_32%)]' : 'bg-[radial-gradient(circle_at_top,rgba(125,211,252,0.28),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(196,181,253,0.35),transparent_32%)]'}`} />
-        <div className={`relative max-w-xl rounded-[32px] border px-8 py-10 shadow-2xl backdrop-blur-xl ${isDark ? 'border-white/10 bg-slate-900/55 text-white' : 'border-white bg-white/80 text-slate-900'}`}>
-          <div className='mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-3xl bg-gradient-to-br from-violet-500 to-cyan-500 text-4xl shadow-lg'>
-            💬
+        <div className={`frost-panel relative max-w-xl rounded-[36px] border px-8 py-10 ${isDark ? 'border-white/10 bg-slate-900/55 text-white' : 'border-white bg-white/82 text-slate-900'}`}>
+          <div className='mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[28px] bg-[linear-gradient(135deg,#7c3aed,#06b6d4)] text-4xl shadow-lg'>
+            ✦
           </div>
-          <h2 className='text-3xl font-bold'>All conversations in one focused workspace.</h2>
+          <h2 className='font-display text-3xl font-semibold'>Step into a calmer, more expressive chat flow.</h2>
           <p className={`mt-3 text-sm leading-6 ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>
-            Select a contact to review history, share media, and continue conversations with real-time updates.
+            Select someone from the orbit to reveal a layered message canvas with live presence, media, and AI drafting support.
           </p>
           <div className='mt-6 grid gap-3 sm:grid-cols-3'>
-            {['Live sync', 'Secure sessions', 'Responsive layout'].map((item) => (
+            {['Presence aware', 'Media native', 'AI assisted'].map((item) => (
               <div
                 key={item}
-                className={`rounded-2xl border px-3 py-3 text-xs font-medium ${isDark ? 'border-white/8 bg-white/5 text-slate-200' : 'border-slate-200 bg-slate-50 text-slate-700'}`}
+                className={`rounded-[22px] border px-3 py-3 text-xs font-medium ${isDark ? 'border-white/8 bg-white/5 text-slate-200' : 'border-slate-200 bg-slate-50 text-slate-700'}`}
               >
                 {item}
               </div>
@@ -144,7 +144,7 @@ const ChatContainer = () => {
 
   return (
     <section className={`relative flex h-full flex-col ${isDark ? 'bg-slate-950/30' : 'bg-white/90'}`}>
-      <header className={`flex items-center justify-between gap-3 border-b px-4 py-3 backdrop-blur-xl ${isDark ? 'border-white/10 bg-slate-900/65' : 'border-slate-200 bg-white/85'}`}>
+      <header className={`halo-divider flex items-center justify-between gap-3 px-4 py-4 backdrop-blur-xl ${isDark ? 'bg-slate-900/65' : 'bg-white/82'}`}>
         <div className='flex min-w-0 items-center gap-3'>
           <button
             type='button'
@@ -166,7 +166,7 @@ const ChatContainer = () => {
           </div>
 
           <div className='min-w-0'>
-            <h3 className={`truncate text-base font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{selectedUser.fullName}</h3>
+            <h3 className={`font-display truncate text-base font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{selectedUser.fullName}</h3>
             {peerIsTyping ? (
               <TypingIndicator />
             ) : (
@@ -185,9 +185,9 @@ const ChatContainer = () => {
         </div>
 
         <div className='hidden items-center gap-2 lg:flex'>
-          <div className={`rounded-2xl border px-3 py-2 text-right text-[11px] font-medium ${isDark ? 'border-white/8 bg-white/5 text-slate-300' : 'border-slate-200 bg-slate-50 text-slate-600'}`}>
-            <div>{messages.length} messages</div>
-            <div>{isOnline ? 'Online' : 'Offline'}</div>
+          <div className={`rounded-[24px] border px-4 py-2.5 text-right text-[11px] font-medium ${isDark ? 'border-white/8 bg-white/5 text-slate-300' : 'border-slate-200 bg-slate-50/90 text-slate-600'}`}>
+            <div>{messages.length} messages in stream</div>
+            <div>{isOnline ? 'Presence active' : 'Presence paused'}</div>
           </div>
         </div>
       </header>
@@ -253,7 +253,7 @@ const ChatContainer = () => {
 
             <input onChange={handleSendImage} id='image' type='file' accept='image/png,image/jpeg,image/gif,image/webp' hidden />
 
-            <div className={`flex flex-1 items-center gap-2 rounded-[24px] border px-3 py-2 shadow-inner ${isDark ? 'border-white/10 bg-slate-800/70' : 'border-slate-200 bg-slate-50'}`}>
+            <div className={`frost-panel flex flex-1 items-center gap-2 rounded-[28px] border px-3 py-2 shadow-inner ${isDark ? 'border-white/10 bg-slate-800/72' : 'border-slate-200 bg-white/80'}`}>
               <input
                 value={input}
                 onChange={handleInputChange}
@@ -280,7 +280,7 @@ const ChatContainer = () => {
           </div>
 
           <div className={`flex items-center justify-between px-1 text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-            <span>Messages stay synchronized with the backend and real-time session.</span>
+            <span>Messages flow live with presence, media, and AI assistance.</span>
             <span className='hidden sm:inline'>Press Enter to send</span>
           </div>
         </div>

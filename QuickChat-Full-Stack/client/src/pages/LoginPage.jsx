@@ -56,18 +56,18 @@ const LoginPage = () => {
   const isSignup = currState === 'Sign up';
 
   return (
-    <div className='min-h-screen bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.18),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.18),transparent_30%),linear-gradient(180deg,#020617,#0f172a_45%,#111827)] px-4 py-8'>
+    <div className='app-shell min-h-screen px-4 py-8'>
       <div className='mx-auto grid min-h-[calc(100vh-4rem)] max-w-6xl items-center gap-8 lg:grid-cols-[1.1fr_0.9fr]'>
-        <section className='hidden rounded-[32px] border border-white/10 bg-slate-900/55 p-10 text-white shadow-[0_24px_80px_rgba(2,6,23,0.45)] backdrop-blur-xl lg:block'>
+        <section className='frost-panel hidden rounded-[36px] border border-white/10 bg-slate-900/60 p-10 text-white lg:block'>
           <div className='max-w-lg'>
-            <div className='inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-cyan-200'>
-              Messaging workspace
+            <div className='inline-flex items-center gap-2 rounded-full border border-cyan-400/20 bg-cyan-400/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.28em] text-cyan-200'>
+              Signature communication
             </div>
-            <h1 className='mt-6 text-5xl font-semibold leading-tight'>
-              Professional communication for fast-moving teams.
+            <h1 className='font-display mt-6 text-5xl font-semibold leading-tight'>
+              Messaging with atmosphere, focus, and a little bit of magic.
             </h1>
             <p className='mt-5 text-base leading-7 text-slate-300'>
-              Chatify keeps conversations, media, and presence updates in sync with a secure, responsive interface designed for modern collaboration.
+              Chatify blends live conversation, subtle depth, and AI-assisted momentum into a workspace that feels memorable from the first interaction.
             </p>
 
             <div className='mt-8 grid gap-3'>
@@ -86,11 +86,11 @@ const LoginPage = () => {
           </div>
         </section>
 
-        <form onSubmit={onSubmitHandler} className='rounded-[32px] border border-white/10 bg-slate-900/70 p-6 shadow-[0_24px_80px_rgba(2,6,23,0.45)] backdrop-blur-xl sm:p-8'>
+        <form onSubmit={onSubmitHandler} className='frost-panel rounded-[36px] border border-white/10 bg-slate-900/72 p-6 sm:p-8'>
           <div className='mb-8 flex items-center justify-between gap-4'>
             <div>
-              <p className='text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300'>Chatify</p>
-              <h2 className='mt-2 text-3xl font-semibold text-white'>
+              <p className='text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300'>Chatify</p>
+              <h2 className='font-display mt-2 text-3xl font-semibold text-white'>
                 {isSignup ? 'Create your workspace account' : 'Sign in to your workspace'}
               </h2>
               <p className='mt-2 text-sm text-slate-400'>

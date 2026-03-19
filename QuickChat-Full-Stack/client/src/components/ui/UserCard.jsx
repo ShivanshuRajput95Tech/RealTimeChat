@@ -10,17 +10,18 @@ const UserCard = ({ user, onSelect, selected, online, unseen }) => {
     <button
       type='button'
       onClick={() => onSelect(user)}
-      className={`group relative w-full overflow-hidden rounded-2xl border px-3.5 py-3 text-left transition-all duration-200 ${
+      className={`group relative w-full overflow-hidden rounded-[28px] border px-4 py-3.5 text-left transition-all duration-200 ${
         selected
           ? isDark
-            ? 'border-violet-400/40 bg-gradient-to-r from-violet-600/35 via-violet-500/20 to-cyan-500/10 shadow-[0_14px_40px_rgba(109,40,217,0.25)]'
+            ? 'border-violet-400/40 bg-[linear-gradient(135deg,rgba(109,40,217,0.45),rgba(15,23,42,0.15)_45%,rgba(6,182,212,0.18))] shadow-[0_18px_48px_rgba(109,40,217,0.22)]'
             : 'border-violet-300 bg-gradient-to-r from-violet-100 via-white to-cyan-50 shadow-[0_14px_40px_rgba(109,40,217,0.12)]'
           : isDark
-            ? 'border-white/8 bg-slate-900/45 hover:border-cyan-400/20 hover:bg-slate-800/70'
-            : 'border-slate-200 bg-white/90 hover:border-cyan-200 hover:bg-slate-50'
+            ? 'border-white/8 bg-slate-900/45 hover:border-cyan-400/20 hover:bg-slate-900/70'
+            : 'border-slate-200 bg-white/88 hover:border-cyan-200 hover:bg-white'
       }`}
     >
-      <div className='absolute inset-y-0 left-0 w-1 bg-gradient-to-b from-violet-400 via-fuchsia-400 to-cyan-400 opacity-0 transition-opacity duration-200 group-hover:opacity-100' />
+      <div className='absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-cyan-400 via-violet-400 to-fuchsia-400 opacity-0 transition-opacity duration-200 group-hover:opacity-100' />
+      <div className={`absolute right-3 top-3 h-16 w-16 rounded-full blur-2xl transition-opacity ${selected ? 'opacity-100' : 'opacity-0 group-hover:opacity-70'} ${isDark ? 'bg-cyan-400/10' : 'bg-cyan-200/50'}`} />
 
       <div className='flex items-center gap-3'>
         <div className='relative shrink-0'>
@@ -42,9 +43,16 @@ const UserCard = ({ user, onSelect, selected, online, unseen }) => {
             </span>
           </div>
 
-          <p className={`mt-1 truncate text-xs ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
+          <p className={`mt-1 truncate text-xs leading-5 ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
             {user.bio || 'Ready to start a conversation'}
           </p>
+
+          <div className='mt-2 flex items-center gap-2'>
+            <span className={`h-1.5 w-1.5 rounded-full ${online ? 'bg-emerald-400' : isDark ? 'bg-slate-500' : 'bg-slate-400'}`} />
+            <span className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              {selected ? 'Currently in focus' : unseen > 0 ? 'Unread activity waiting' : 'Conversation is calm'}
+            </span>
+          </div>
         </div>
 
         <div className='flex flex-col items-end gap-2'>

@@ -20,8 +20,8 @@ const RightSidebar = () => {
     : 'Unknown';
 
   return (
-    <aside className={`hidden h-full overflow-y-auto border-l p-4 lg:flex lg:flex-col ${isDark ? 'border-white/10 bg-gradient-to-b from-slate-900/35 to-slate-950/45 text-white' : 'border-slate-200 bg-gradient-to-b from-slate-50 to-white text-slate-900'} scrollbar-thin ${isDark ? 'scrollbar-thumb-slate-600 scrollbar-track-slate-800' : 'scrollbar-thumb-slate-300 scrollbar-track-slate-100'}`}>
-      <div className={`overflow-hidden rounded-[28px] border shadow-xl ${isDark ? 'border-white/10 bg-slate-900/60' : 'border-slate-200 bg-white'}`}>
+    <aside className={`hidden h-full overflow-y-auto border-l p-4 lg:flex lg:flex-col ${isDark ? 'border-white/10 bg-slate-950/28 text-white' : 'border-slate-200/70 bg-white/28 text-slate-900'} scrollbar-thin ${isDark ? 'scrollbar-thumb-slate-600 scrollbar-track-slate-800' : 'scrollbar-thumb-slate-300 scrollbar-track-slate-100'}`}>
+      <div className={`frost-panel overflow-hidden rounded-[32px] border ${isDark ? 'border-white/10 bg-slate-900/60' : 'border-white/80 bg-white/82'}`}>
         <div className={`h-28 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.35),transparent_45%),radial-gradient(circle_at_80%_30%,rgba(168,85,247,0.4),transparent_40%)] ${isDark ? 'bg-slate-900' : 'bg-slate-100'}`} />
         <div className='px-5 pb-5'>
           <div className='-mt-12 flex flex-col items-center gap-3'>
@@ -34,7 +34,7 @@ const RightSidebar = () => {
               <div className={`absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-2 ${isDark ? 'border-slate-900' : 'border-white'} ${isOnline ? 'bg-emerald-400' : isDark ? 'bg-slate-500' : 'bg-slate-400'}`} />
             </div>
             <div className='text-center'>
-              <h3 className={`text-xl font-bold ${isDark ? 'text-white' : 'text-slate-900'}`}>{selectedUser.fullName}</h3>
+              <h3 className={`font-display text-xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{selectedUser.fullName}</h3>
               <p className={`mt-1 text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{selectedUser.email}</p>
               <span className={`mt-3 inline-flex rounded-full px-3 py-1 text-xs font-semibold ${isOnline ? 'bg-emerald-500/15 text-emerald-400' : isDark ? 'bg-slate-800 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
                 {isOnline ? 'Active now' : 'Offline'}
@@ -51,12 +51,12 @@ const RightSidebar = () => {
 
       <div className='mt-4 grid grid-cols-2 gap-3'>
         {[
-          { label: 'Messages', value: totalMessages, tone: 'text-cyan-400' },
-          { label: 'Sent by you', value: myMessageCount, tone: 'text-violet-400' },
-          { label: 'Shared media', value: msgImages.length, tone: 'text-amber-400' },
-          { label: 'Member since', value: joinDate, tone: isDark ? 'text-slate-200' : 'text-slate-800' },
+          { label: 'Stream', value: totalMessages, tone: 'text-cyan-400' },
+          { label: 'Echoes', value: myMessageCount, tone: 'text-violet-400' },
+          { label: 'Media', value: msgImages.length, tone: 'text-amber-400' },
+          { label: 'Since', value: joinDate, tone: isDark ? 'text-slate-200' : 'text-slate-800' },
         ].map((item) => (
-          <div key={item.label} className={`rounded-2xl border p-3 ${isDark ? 'border-white/8 bg-slate-900/60' : 'border-slate-200 bg-white'}`}>
+          <div key={item.label} className={`rounded-[24px] border p-3 ${isDark ? 'border-white/8 bg-slate-900/60' : 'border-slate-200 bg-white/82'}`}>
             <p className={`text-[11px] uppercase tracking-[0.18em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{item.label}</p>
             <p className={`mt-2 text-sm font-semibold ${item.tone}`}>{item.value}</p>
           </div>

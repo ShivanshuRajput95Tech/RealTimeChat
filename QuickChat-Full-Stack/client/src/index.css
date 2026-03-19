@@ -1,13 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100..900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Sora:wght@400;600;700;800&display=swap');
 
 @import "tailwindcss";
 
 *{
-  font-family: "Outfit", sans-serif;
+  font-family: "Inter", sans-serif;
+}
+
+html {
+  color-scheme: light;
+}
+
+html.dark {
+  color-scheme: dark;
 }
 
 body {
   min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(78, 185, 255, 0.18), transparent 24%),
+    radial-gradient(circle at 82% 14%, rgba(181, 120, 255, 0.16), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(69, 217, 193, 0.16), transparent 28%),
+    linear-gradient(180deg, #f3f6ff 0%, #edf3ff 44%, #f8fbff 100%);
+  color: #122033;
+}
+
+h1,
+h2,
+h3,
+h4,
+.font-display {
+  font-family: "Sora", sans-serif;
+  letter-spacing: -0.03em;
+}
+
+.dark body {
+  background:
+    radial-gradient(circle at top left, rgba(34, 211, 238, 0.16), transparent 22%),
+    radial-gradient(circle at 82% 12%, rgba(168, 85, 247, 0.18), transparent 24%),
+    radial-gradient(circle at bottom right, rgba(59, 130, 246, 0.18), transparent 28%),
+    linear-gradient(180deg, #030712 0%, #0b1220 52%, #101827 100%);
+  color: #e5eefb;
 }
 
 ::-webkit-scrollbar{
@@ -84,6 +116,68 @@ textarea:focus {
 
 .chat-surface {
   background-image:
-    radial-gradient(circle at top, rgba(34, 211, 238, 0.07), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.08), transparent 24%);
+    radial-gradient(circle at top, rgba(34, 211, 238, 0.11), transparent 26%),
+    radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.12), transparent 22%);
+}
+
+.app-shell {
+  position: relative;
+  isolation: isolate;
+}
+
+.app-shell::before {
+  content: "";
+  position: absolute;
+  inset: 1.25rem;
+  z-index: -1;
+  border-radius: 2rem;
+  background:
+    radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.35), transparent 22%),
+    radial-gradient(circle at 80% 0%, rgba(157, 124, 255, 0.18), transparent 26%),
+    radial-gradient(circle at 80% 80%, rgba(50, 211, 190, 0.14), transparent 24%);
+  filter: blur(18px);
+  opacity: 0.9;
+}
+
+.dark .app-shell::before {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(56, 189, 248, 0.12), transparent 24%),
+    radial-gradient(circle at 82% 0%, rgba(168, 85, 247, 0.2), transparent 26%),
+    radial-gradient(circle at 80% 80%, rgba(20, 184, 166, 0.16), transparent 24%);
+}
+
+.frost-panel {
+  backdrop-filter: blur(22px);
+  box-shadow: 0 24px 80px rgba(15, 23, 42, 0.12);
+}
+
+.dark .frost-panel {
+  box-shadow: 0 28px 90px rgba(2, 6, 23, 0.42);
+}
+
+.halo-divider {
+  position: relative;
+}
+
+.halo-divider::after {
+  content: "";
+  position: absolute;
+  inset-inline: 0;
+  bottom: -1px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(96, 165, 250, 0.55), rgba(168, 85, 247, 0.55), transparent);
+}
+
+.orb-dot {
+  position: relative;
+}
+
+.orb-dot::after {
+  content: "";
+  position: absolute;
+  inset: -6px;
+  border-radius: 9999px;
+  background: inherit;
+  filter: blur(10px);
+  opacity: 0.45;
 }

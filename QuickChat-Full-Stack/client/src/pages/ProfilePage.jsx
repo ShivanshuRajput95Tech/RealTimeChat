@@ -60,13 +60,13 @@ const ProfilePage = () => {
   const previewImg = selectedImg ? URL.createObjectURL(selectedImg) : (authUser?.profilePic || assets.avatar_icon);
 
   return (
-    <div className='min-h-screen bg-[radial-gradient(circle_at_top,rgba(59,130,246,0.16),transparent_25%),radial-gradient(circle_at_bottom_right,rgba(168,85,247,0.15),transparent_30%),linear-gradient(180deg,#020617,#0f172a_45%,#111827)] px-4 py-8'>
+    <div className='app-shell min-h-screen px-4 py-8'>
       <div className='mx-auto max-w-4xl'>
-        <div className='rounded-[32px] border border-white/10 bg-slate-900/70 shadow-[0_24px_80px_rgba(2,6,23,0.45)] backdrop-blur-xl'>
-          <div className='flex flex-col gap-6 border-b border-white/10 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8'>
+        <div className='frost-panel rounded-[36px] border border-white/10 bg-slate-900/72'>
+          <div className='halo-divider flex flex-col gap-6 px-6 py-6 sm:flex-row sm:items-center sm:justify-between sm:px-8'>
             <div>
-              <p className='text-xs font-semibold uppercase tracking-[0.24em] text-cyan-300'>Profile settings</p>
-              <h1 className='mt-2 text-3xl font-semibold text-white'>Manage your account</h1>
+              <p className='text-xs font-semibold uppercase tracking-[0.28em] text-cyan-300'>Profile settings</p>
+              <h1 className='font-display mt-2 text-3xl font-semibold text-white'>Shape your identity</h1>
               <p className='mt-2 text-sm text-slate-400'>Update your public profile, avatar, and workspace details.</p>
             </div>
             <button
