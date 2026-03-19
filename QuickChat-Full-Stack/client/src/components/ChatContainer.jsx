@@ -115,7 +115,7 @@ const ChatContainer = () => {
   if (!selectedUser) {
     return (
       <main className={`relative flex h-full flex-col items-center justify-center overflow-hidden px-6 text-center ${isDark ? 'bg-slate-950/30' : 'bg-slate-100/80'}`}>
-        <div className={`absolute inset-0 opacity-70 ${isDark ? 'bg-[radial-gradient(circle_at_top,rgba(56,189,248,0.16),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(168,85,247,0.18),transparent_32%)]' : 'bg-[radial-gradient(circle_at_top,rgba(125,211,252,0.28),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(196,181,253,0.35),transparent_32%)]'}`} />
+        <div className={`absolute inset-0 opacity-70 ${isDark ? 'bg-[radial-gradient(circle_at_top,rgba(52,211,153,0.16),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(56,189,248,0.16),transparent_32%)]' : 'bg-[radial-gradient(circle_at_top,rgba(110,231,183,0.22),transparent_35%),radial-gradient(circle_at_80%_80%,rgba(125,211,252,0.28),transparent_32%)]'}`} />
         <div className={`frost-panel relative max-w-xl rounded-[36px] border px-8 py-10 ${isDark ? 'border-white/10 bg-slate-900/55 text-white' : 'border-white bg-white/82 text-slate-900'}`}>
           <div className='mx-auto mb-5 flex h-20 w-20 items-center justify-center rounded-[28px] bg-[linear-gradient(135deg,#10b981,#14b8a6)] text-4xl shadow-lg'>
             💬
@@ -264,7 +264,7 @@ const ChatContainer = () => {
               <button
                 type='submit'
                 disabled={loading || !input.trim()}
-                className='inline-flex h-10 min-w-10 items-center justify-center rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-500 px-4 text-xs font-semibold uppercase tracking-wide text-white shadow-lg transition hover:from-violet-600 hover:to-cyan-600 disabled:cursor-not-allowed disabled:opacity-50'
+                className='inline-flex h-10 min-w-10 items-center justify-center rounded-2xl bg-gradient-to-r from-emerald-500 to-sky-500 px-4 text-xs font-semibold uppercase tracking-wide text-white shadow-lg transition hover:from-emerald-600 hover:to-sky-600 disabled:cursor-not-allowed disabled:opacity-50'
                 title='Send message'
               >
                 {loading ? (

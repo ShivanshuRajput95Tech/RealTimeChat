@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useChat, useTheme } from '../../context';
 import assets from '../assets/assets';
+import Dashboard from './Dashboard';
 import UserCard from './ui/UserCard';
 
 const Sidebar = () => {
@@ -92,7 +93,7 @@ const Sidebar = () => {
             <button
               type='button'
               onClick={toggleTheme}
-              className={`rounded-2xl p-2.5 text-sm transition ${isDark ? 'bg-cyan-500/15 text-cyan-300 hover:bg-cyan-500/25' : 'bg-white text-cyan-700 shadow-sm hover:bg-cyan-50'}`}
+              className={`rounded-2xl p-2.5 text-sm transition ${isDark ? 'bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25' : 'bg-white text-emerald-700 shadow-sm hover:bg-emerald-50'}`}
               title={isDark ? 'Light mode' : 'Dark mode'}
             >
               {isDark ? '☀️' : '🌙'}
@@ -100,7 +101,7 @@ const Sidebar = () => {
             <button
               type='button'
               onClick={() => navigate('/profile')}
-              className={`rounded-2xl p-2.5 text-sm transition ${isDark ? 'bg-violet-500/15 text-violet-300 hover:bg-violet-500/25' : 'bg-white text-violet-700 shadow-sm hover:bg-violet-50'}`}
+              className={`rounded-2xl p-2.5 text-sm transition ${isDark ? 'bg-sky-500/15 text-sky-200 hover:bg-sky-500/25' : 'bg-white text-sky-700 shadow-sm hover:bg-sky-50'}`}
               title='Profile'
             >
               👤
@@ -145,7 +146,7 @@ const Sidebar = () => {
           onClick={() => setShowDashboard(!showDashboard)}
           className={`flex-1 rounded-[22px] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition ${
             showDashboard
-              ? 'bg-gradient-to-r from-violet-500 to-cyan-500 text-white shadow-lg'
+              ? 'bg-gradient-to-r from-emerald-500 to-sky-500 text-white shadow-lg'
               : isDark
                 ? 'bg-slate-900/70 text-slate-300 hover:bg-slate-800'
                 : 'bg-white text-slate-700 shadow hover:bg-slate-50'
@@ -163,27 +164,8 @@ const Sidebar = () => {
       </div>
 
       {showDashboard ? (
-        <div className='mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain'>
-          <div className={`rounded-[26px] border p-4 ${isDark ? 'border-white/8 bg-slate-900/60' : 'border-slate-200 bg-white'}`}>
-            <p className={`text-[11px] uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Account</p>
-            <p className={`mt-2 text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{authUser?.fullName}</p>
-            <p className={`mt-1 text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{authUser?.email}</p>
-          </div>
-
-          <div className={`rounded-[26px] border p-4 ${isDark ? 'border-white/8 bg-slate-900/60' : 'border-slate-200 bg-white'}`}>
-            <p className={`text-[11px] uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Status</p>
-            <div className='mt-3 space-y-2'>
-              {[
-                `${onlineCount} contact${onlineCount === 1 ? '' : 's'} online now`,
-                `${totalUnseen} unread message${totalUnseen === 1 ? '' : 's'} waiting`,
-                authUser?.bio ? 'Profile bio added' : 'Add a bio for a richer profile',
-              ].map((item) => (
-                <div key={item} className={`rounded-2xl px-3 py-2 text-sm ${isDark ? 'bg-white/5 text-slate-300' : 'bg-slate-50 text-slate-600'}`}>
-                  {item}
-                </div>
-              ))}
-            </div>
-          </div>
+        <div className='mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain'>
+          <Dashboard />
         </div>
       ) : (
         <>

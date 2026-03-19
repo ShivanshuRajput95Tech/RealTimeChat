@@ -22,7 +22,7 @@ const RightSidebar = () => {
   return (
     <aside className={`hidden min-h-0 h-full overflow-y-auto border-l p-4 lg:flex lg:flex-col ${isDark ? 'border-white/10 bg-slate-950/28 text-white' : 'border-slate-200/70 bg-white/28 text-slate-900'} scrollbar-thin overscroll-contain ${isDark ? 'scrollbar-thumb-slate-600 scrollbar-track-slate-800' : 'scrollbar-thumb-slate-300 scrollbar-track-slate-100'}`}>
       <div className={`frost-panel overflow-hidden rounded-[32px] border ${isDark ? 'border-white/10 bg-slate-900/60' : 'border-white/80 bg-white/82'}`}>
-        <div className={`h-28 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.35),transparent_45%),radial-gradient(circle_at_80%_30%,rgba(168,85,247,0.4),transparent_40%)] ${isDark ? 'bg-slate-900' : 'bg-slate-100'}`} />
+        <div className={`h-28 bg-[radial-gradient(circle_at_top,rgba(52,211,153,0.28),transparent_45%),radial-gradient(circle_at_80%_30%,rgba(56,189,248,0.28),transparent_40%)] ${isDark ? 'bg-slate-900' : 'bg-slate-100'}`} />
         <div className='px-5 pb-5'>
           <div className='-mt-12 flex flex-col items-center gap-3'>
             <div className='relative'>
@@ -53,7 +53,7 @@ const RightSidebar = () => {
       <div className='mt-4 grid grid-cols-2 gap-3'>
         {[
           { label: 'Messages', value: totalMessages, tone: 'text-emerald-400' },
-          { label: 'Sent by you', value: myMessageCount, tone: 'text-cyan-400' },
+          { label: 'Sent by you', value: myMessageCount, tone: 'text-sky-400' },
           { label: 'Shared media', value: msgImages.length, tone: 'text-amber-400' },
           { label: 'Member since', value: joinDate, tone: isDark ? 'text-slate-200' : 'text-slate-800' },
         ].map((item) => (

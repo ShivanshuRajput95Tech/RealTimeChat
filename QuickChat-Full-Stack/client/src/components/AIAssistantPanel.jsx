@@ -1,20 +1,20 @@
 import React, { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { apiClient, apiPaths, extractErrorMessage } from '../lib/api';
 import { useTheme } from '../../context';
+import { apiClient, apiPaths, extractErrorMessage } from '../lib/api';
 
 const toneConfig = {
   positive: {
     label: 'Positive tone',
-    classes: 'bg-emerald-500/15 text-emerald-300 border-emerald-400/20',
+    classes: 'bg-emerald-500/12 text-emerald-300 border-emerald-400/20',
   },
   negative: {
     label: 'Needs attention',
-    classes: 'bg-rose-500/15 text-rose-300 border-rose-400/20',
+    classes: 'bg-rose-500/12 text-rose-300 border-rose-400/20',
   },
   neutral: {
     label: 'Neutral tone',
-    classes: 'bg-slate-500/15 text-slate-300 border-slate-400/20',
+    classes: 'bg-slate-500/12 text-slate-300 border-slate-400/20',
   },
 };
 
@@ -94,16 +94,16 @@ const AIAssistantPanel = ({ selectedUser, messages, onSuggestionPick, compact = 
   const tone = sentiment ? toneConfig[sentiment.label] || toneConfig.neutral : toneConfig.neutral;
 
   return (
-    <section className={`rounded-[28px] border p-4 ${isDark ? 'border-white/8 bg-slate-900/60 text-white' : 'border-slate-200 bg-white text-slate-900'}`}>
+    <section className={`surface-border rounded-[28px] p-4 ${isDark ? 'bg-slate-900/60 text-white' : 'bg-white/92 text-slate-900'}`}>
       <div className='flex items-start justify-between gap-3'>
         <div>
-          <p className={`text-[11px] uppercase tracking-[0.18em] ${isDark ? 'text-cyan-300' : 'text-cyan-600'}`}>AI copilot</p>
-          <h4 className='mt-2 text-lg font-semibold'>Stay on top of the conversation</h4>
-          <p className={`mt-1 text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-            Generate summaries, tone checks, and ready-to-send reply suggestions.
+          <p className='section-kicker'>AI assistant</p>
+          <h4 className='mt-2 text-lg font-semibold'>Summarise, assess tone, and draft replies</h4>
+          <p className={`mt-1 text-sm leading-6 ${isDark ? 'text-slate-400' : 'text-slate-600'}`}>
+            Use AI to catch up on the latest thread or respond faster without losing your own voice.
           </p>
         </div>
-        <div className='rounded-2xl bg-gradient-to-br from-cyan-500 to-violet-500 px-3 py-2 text-sm font-semibold text-white shadow-lg'>
+        <div className='rounded-2xl bg-gradient-to-br from-emerald-500 to-sky-500 px-3 py-2 text-sm font-semibold text-white shadow-lg'>
           AI
         </div>
       </div>
@@ -119,10 +119,10 @@ const AIAssistantPanel = ({ selectedUser, messages, onSuggestionPick, compact = 
             type='button'
             onClick={() => runAction(action.key)}
             disabled={loadingAction === action.key}
-            className={`rounded-2xl border px-3 py-3 text-left text-sm font-medium transition ${
+            className={`surface-border rounded-2xl px-3 py-3 text-left text-sm font-medium transition ${
               isDark
-                ? 'border-white/10 bg-white/5 text-slate-200 hover:bg-white/10'
-                : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100'
+                ? 'bg-white/5 text-slate-200 hover:bg-white/10'
+                : 'bg-slate-50 text-slate-700 hover:bg-slate-100'
             } disabled:cursor-not-allowed disabled:opacity-60`}
           >
             {loadingAction === action.key ? 'Working…' : action.label}
@@ -131,7 +131,7 @@ const AIAssistantPanel = ({ selectedUser, messages, onSuggestionPick, compact = 
       </div>
 
       {summary && (
-        <div className={`mt-4 rounded-2xl border px-4 py-4 ${isDark ? 'border-white/8 bg-slate-950/60' : 'border-slate-200 bg-slate-50'}`}>
+        <div className={`surface-border mt-4 rounded-2xl px-4 py-4 ${isDark ? 'bg-slate-950/60' : 'bg-slate-50'}`}>
           <div className='flex items-center justify-between gap-2'>
             <p className='text-sm font-semibold'>Conversation summary</p>
             <span className={`text-[11px] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Latest thread</span>
@@ -141,7 +141,7 @@ const AIAssistantPanel = ({ selectedUser, messages, onSuggestionPick, compact = 
             <ul className={`mt-3 space-y-2 text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
               {keyPoints.map((point) => (
                 <li key={point} className='flex gap-2'>
-                  <span className='mt-1 text-cyan-400'>•</span>
+                  <span className='mt-1 text-emerald-400'>•</span>
                   <span>{point}</span>
                 </li>
               ))}
@@ -160,7 +160,7 @@ const AIAssistantPanel = ({ selectedUser, messages, onSuggestionPick, compact = 
       {suggestions.length > 0 && (
         <div className='mt-4'>
           <div className='flex items-center justify-between gap-2'>
-            <p className='text-sm font-semibold'>Smart reply suggestions</p>
+            <p className='text-sm font-semibold'>Reply suggestions</p>
             <span className={`text-[11px] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>
               {onSuggestionPick ? 'Click to draft' : 'Click to copy'}
             </span>
@@ -173,8 +173,8 @@ const AIAssistantPanel = ({ selectedUser, messages, onSuggestionPick, compact = 
                 onClick={() => handleSuggestionClick(suggestion)}
                 className={`rounded-full px-4 py-2 text-sm transition ${
                   isDark
-                    ? 'bg-cyan-500/10 text-cyan-200 hover:bg-cyan-500/20'
-                    : 'bg-cyan-50 text-cyan-700 hover:bg-cyan-100'
+                    ? 'bg-emerald-500/10 text-emerald-200 hover:bg-emerald-500/18'
+                    : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100'
                 }`}
               >
                 {suggestion}

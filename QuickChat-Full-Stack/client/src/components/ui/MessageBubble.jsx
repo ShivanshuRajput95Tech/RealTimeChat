@@ -44,12 +44,12 @@ const MessageBubble = ({ msg, isMine, peerAvatar, myAvatar }) => {
           {showText && <p className='whitespace-pre-wrap leading-6'>{msg.text}</p>}
 
           <div className='mt-3 flex items-center gap-1.5'>
-            <time className={`text-[11px] font-medium ${isMine ? 'text-violet-100' : isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+            <time className={`text-[11px] font-medium ${isMine ? 'text-emerald-50' : isDark ? 'text-slate-400' : 'text-slate-500'}`}>
               {formatMessageTime(msg.createdAt)}
             </time>
 
             {isMine && (
-              <span className={`text-xs ${msg.seen ? 'text-cyan-100' : 'text-violet-200/80'}`} title={msg.seen ? 'Seen' : 'Sent'}>
+              <span className={`text-xs ${msg.seen ? 'text-sky-100' : 'text-emerald-100/80'}`} title={msg.seen ? 'Seen' : 'Sent'}>
                 {msg.seen ? '✓✓' : '✓'}
               </span>
             )}
