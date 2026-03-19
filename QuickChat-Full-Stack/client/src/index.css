@@ -6,11 +6,15 @@
   font-family: "Outfit", sans-serif;
 }
 
-::-webkit-scrollbar{
-  display: none;
+body {
+  min-height: 100vh;
 }
 
-/* Animations */
+::-webkit-scrollbar{
+  width: 8px;
+  height: 8px;
+}
+
 @keyframes blob {
   0%, 100% {
     transform: translate(0, 0) scale(1);
@@ -38,47 +42,48 @@
   animation-delay: 4s;
 }
 
-/* Smooth scrollbar for better UX */
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(148, 163, 184, 0.5);
-  border-radius: 10px;
+  background: rgba(148, 163, 184, 0.45);
+  border-radius: 9999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(148, 163, 184, 0.7);
 }
 
-/* Form inputs styling */
 input:focus,
 textarea:focus {
-  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+  box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.12);
 }
 
-/* Smooth transitions */
 * {
   @apply transition-colors duration-200;
 }
 
-/* Selection color */
 ::selection {
   background-color: rgba(139, 92, 246, 0.3);
   color: inherit;
 }
 
-/* Pulse animation */
 @keyframes pulse-fade {
   0%, 100% {
     opacity: 1;
   }
   50% {
-    opacity: 0.8;
+    opacity: 0.82;
   }
 }
 
 .animate-pulse-fade {
   animation: pulse-fade 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.chat-surface {
+  background-image:
+    radial-gradient(circle at top, rgba(34, 211, 238, 0.07), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(168, 85, 247, 0.08), transparent 24%);
 }

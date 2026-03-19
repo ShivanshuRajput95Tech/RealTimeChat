@@ -1,27 +1,24 @@
-import User from "../models/User.js";
-import jwt from "jsonwebtoken";
+import User from '../models/User.js';
+import AuthService from '../services/authService.js';
+import { asyncHandler, NotFoundError, UnauthorizedError } from '../lib/errors.js';
+import logger from '../lib/logger.js';
 
 // Middleware to protect routes
-export const protectRoute = async (req, res, next) => {
-    try {
-        const authHeader = req.headers.authorization || req.headers.token;
-        if (!authHeader) {
-            return res.status(401).json({ success: false, message: "Token missing" });
-        }
+export const protectRoute = asyncHandler(async (req, res, next) => {
+  const authHeader = req.headers.authorization || req.headers.token;
+  if (!authHeader) {
+    throw new UnauthorizedError('Token missing');
+  }
 
-        const token = authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : authHeader;
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const token = authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : authHeader;
+  const decoded = AuthService.verifyToken(token);
 
-        const user = await User.findById(decoded.userId).select("-password");
+  const user = await User.findById(decoded.userId).select('-password');
+  if (!user) {
+    throw new NotFoundError('User');
+  }
 
-        if (!user) {
-            return res.status(404).json({ success: false, message: "User not found" });
-        }
-
-        req.user = user;
-        next();
-    } catch (error) {
-        console.log(error.message);
-        return res.status(401).json({ success: false, message: "Invalid or expired token" });
-    }
-};
+  req.user = user;
+  logger.debug('Protected route authorized', { userId: user._id, path: req.path });
+  next();
+});

@@ -1,15 +1,7 @@
 // lib/validators.js
 // Input validation utilities for production-ready validation
 
-export class ValidationError extends Error {
-  constructor(message, field = null) {
-    super(message);
-    this.name = 'ValidationError';
-    this.field = field;
-    this.statusCode = 400;
-    this.isOperational = true;
-  }
-}
+import { ValidationError } from './errors.js';
 
 // Email validation
 export const validateEmail = (email) => {
@@ -39,6 +31,7 @@ export const validateFullName = (fullName) => {
   if (!fullName || typeof fullName !== 'string') {
     throw new ValidationError('Full name is required', 'fullName');
   }
+
   const trimmed = fullName.trim();
   if (trimmed.length < 2) {
     throw new ValidationError('Full name must be at least 2 characters', 'fullName');
@@ -46,10 +39,10 @@ export const validateFullName = (fullName) => {
   if (trimmed.length > 100) {
     throw new ValidationError('Full name is too long', 'fullName');
   }
-  // Check for invalid characters
   if (!/^[a-zA-Z\s'-]+$/.test(trimmed)) {
     throw new ValidationError('Full name contains invalid characters', 'fullName');
   }
+
   return trimmed;
 };
 
@@ -61,18 +54,21 @@ export const validateBio = (bio) => {
   if (typeof bio !== 'string') {
     throw new ValidationError('Bio must be a string', 'bio');
   }
+
   const trimmed = bio.trim();
   if (trimmed.length > 500) {
     throw new ValidationError('Bio must be less than 500 characters', 'bio');
   }
+
   return trimmed;
 };
 
 // Message text validation
 export const validateMessageText = (text) => {
   if (!text || typeof text !== 'string') {
-    return null; // Text is optional if image is provided
+    return null;
   }
+
   const trimmed = text.trim();
   if (trimmed.length === 0) {
     return null;
@@ -80,21 +76,22 @@ export const validateMessageText = (text) => {
   if (trimmed.length > 5000) {
     throw new ValidationError('Message is too long (max 5000 characters)', 'text');
   }
+
   return trimmed;
 };
 
 // Message image validation
-export const validateMessageImage = (image) => {
+export const validateMessageImage = (image, fieldName = 'image') => {
   if (!image) {
     return null;
   }
   if (typeof image !== 'string') {
-    throw new ValidationError('Image must be a base64 string', 'image');
+    throw new ValidationError('Image must be a base64 string', fieldName);
   }
-  // Check maximum size (base64 encoded, ~4MB)
   if (image.length > 5242880) {
-    throw new ValidationError('Image is too large (max 4MB)', 'image');
+    throw new ValidationError('Image is too large (max 4MB)', fieldName);
   }
+
   return image;
 };
 
@@ -103,10 +100,10 @@ export const validateObjectId = (id, fieldName = 'id') => {
   if (!id || typeof id !== 'string') {
     throw new ValidationError(`${fieldName} is required`, fieldName);
   }
-  // Simple MongoDB ObjectId format check (24 hex characters)
   if (!/^[0-9a-f]{24}$/i.test(id)) {
     throw new ValidationError(`Invalid ${fieldName} format`, fieldName);
   }
+
   return id;
 };
 
@@ -135,21 +132,17 @@ export const validateLogin = (data) => {
 // Update profile validation
 export const validateUpdateProfile = (data) => {
   const { fullName, bio, profilePic } = data;
-
   const result = {};
 
   if (fullName !== undefined) {
     result.fullName = validateFullName(fullName);
   }
-
   if (bio !== undefined) {
     result.bio = validateBio(bio);
   }
-
   if (profilePic !== undefined) {
-    result.profilePic = validateMessageImage(profilePic);
+    result.profilePic = validateMessageImage(profilePic, 'profilePic');
   }
-
   if (Object.keys(result).length === 0) {
     throw new ValidationError('At least one field must be provided for update', 'profile');
   }
@@ -160,7 +153,6 @@ export const validateUpdateProfile = (data) => {
 // Send message validation
 export const validateSendMessage = (data) => {
   const { text, image } = data;
-
   const validatedText = validateMessageText(text);
   const validatedImage = validateMessageImage(image);
 
@@ -176,10 +168,13 @@ export const validateSendMessage = (data) => {
 
 // Pagination validation
 export const validatePagination = (page, limit) => {
-  const p = Math.max(parseInt(page || '1', 10), 1);
-  const l = Math.min(Math.max(parseInt(limit || '50', 10), 1), 100);
+  const parsedPage = Number.parseInt(page || '1', 10);
+  const parsedLimit = Number.parseInt(limit || '50', 10);
 
-  return { page: p, limit: l };
+  return {
+    page: Number.isNaN(parsedPage) ? 1 : Math.max(parsedPage, 1),
+    limit: Number.isNaN(parsedLimit) ? 50 : Math.min(Math.max(parsedLimit, 1), 100),
+  };
 };
 
 // Search query validation
@@ -187,6 +182,7 @@ export const validateSearchQuery = (query) => {
   if (!query || typeof query !== 'string') {
     throw new ValidationError('Search query is required', 'query');
   }
+
   const trimmed = query.trim();
   if (trimmed.length < 1) {
     throw new ValidationError('Search query must not be empty', 'query');
@@ -194,6 +190,7 @@ export const validateSearchQuery = (query) => {
   if (trimmed.length > 100) {
     throw new ValidationError('Search query is too long', 'query');
   }
+
   return trimmed;
 };
 
