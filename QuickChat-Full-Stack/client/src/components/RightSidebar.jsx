@@ -20,7 +20,7 @@ const RightSidebar = () => {
     : 'Unknown';
 
   return (
-    <aside className={`hidden h-full overflow-y-auto border-l p-4 lg:flex lg:flex-col ${isDark ? 'border-white/10 bg-slate-950/28 text-white' : 'border-slate-200/70 bg-white/28 text-slate-900'} scrollbar-thin ${isDark ? 'scrollbar-thumb-slate-600 scrollbar-track-slate-800' : 'scrollbar-thumb-slate-300 scrollbar-track-slate-100'}`}>
+    <aside className={`hidden min-h-0 h-full overflow-y-auto border-l p-4 lg:flex lg:flex-col ${isDark ? 'border-white/10 bg-slate-950/28 text-white' : 'border-slate-200/70 bg-white/28 text-slate-900'} scrollbar-thin overscroll-contain ${isDark ? 'scrollbar-thumb-slate-600 scrollbar-track-slate-800' : 'scrollbar-thumb-slate-300 scrollbar-track-slate-100'}`}>
       <div className={`frost-panel overflow-hidden rounded-[32px] border ${isDark ? 'border-white/10 bg-slate-900/60' : 'border-white/80 bg-white/82'}`}>
         <div className={`h-28 bg-[radial-gradient(circle_at_top,rgba(34,211,238,0.35),transparent_45%),radial-gradient(circle_at_80%_30%,rgba(168,85,247,0.4),transparent_40%)] ${isDark ? 'bg-slate-900' : 'bg-slate-100'}`} />
         <div className='px-5 pb-5'>

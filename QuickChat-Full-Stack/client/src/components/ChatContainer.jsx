@@ -143,7 +143,7 @@ const ChatContainer = () => {
   const peerIsTyping = isTyping[selectedUser._id];
 
   return (
-    <section className={`relative flex h-full flex-col ${isDark ? 'bg-slate-950/30' : 'bg-white/90'}`}>
+    <section className={`relative flex min-h-0 h-full flex-col ${isDark ? 'bg-slate-950/30' : 'bg-white/90'}`}>
       <header className={`halo-divider flex items-center justify-between gap-3 px-4 py-4 backdrop-blur-xl ${isDark ? 'bg-slate-900/65' : 'bg-white/82'}`}>
         <div className='flex min-w-0 items-center gap-3'>
           <button
@@ -192,7 +192,7 @@ const ChatContainer = () => {
         </div>
       </header>
 
-      <div className={`chat-surface flex-1 overflow-y-auto px-3 py-4 sm:px-4 sm:py-5 scrollbar-thin ${isDark ? 'scrollbar-thumb-slate-600 scrollbar-track-slate-800' : 'scrollbar-thumb-slate-300 scrollbar-track-slate-100'}`}>
+      <div className={`chat-surface min-h-0 flex-1 overflow-y-auto px-3 py-4 sm:px-4 sm:py-5 scrollbar-thin overscroll-contain ${isDark ? 'scrollbar-thumb-slate-600 scrollbar-track-slate-800' : 'scrollbar-thumb-slate-300 scrollbar-track-slate-100'}`}>
         <div className='mx-auto flex max-w-4xl flex-col gap-4'>
           {isMessagesLoading && (
             <div className='space-y-3'>

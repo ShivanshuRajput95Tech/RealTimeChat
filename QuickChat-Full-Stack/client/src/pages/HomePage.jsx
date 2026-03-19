@@ -30,7 +30,7 @@ const HomePage = () => {
           </div>
         </div>
 
-        <div className={`relative z-10 grid min-h-0 flex-1 ${selectedUser ? 'grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)_360px]' : 'grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)]'}`}>
+        <div className={`relative z-10 grid min-h-0 flex-1 overflow-hidden ${selectedUser ? 'grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)_360px]' : 'grid-cols-1 lg:grid-cols-[340px_minmax(0,1fr)]'}`}>
           <Sidebar />
           <ChatContainer />
           <RightSidebar />

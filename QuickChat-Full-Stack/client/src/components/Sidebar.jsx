@@ -61,7 +61,7 @@ const Sidebar = () => {
   }, [query, searchUsers, showDashboard]);
 
   return (
-    <aside className={`h-full border-r p-4 md:p-5 ${selectedUser ? 'hidden md:flex' : 'flex'} flex-col ${isDark ? 'border-white/10 bg-slate-950/30' : 'border-slate-200/70 bg-white/30'}`}>
+    <aside className={`min-h-0 h-full border-r p-4 md:p-5 ${selectedUser ? 'hidden md:flex' : 'flex'} flex-col ${isDark ? 'border-white/10 bg-slate-950/30' : 'border-slate-200/70 bg-white/30'}`}>
       <div className={`frost-panel rounded-[34px] border p-5 ${isDark ? 'border-white/10 bg-slate-900/62' : 'border-white/80 bg-white/78'}`}>
         <div className='flex items-start justify-between gap-4'>
           <div>
@@ -198,7 +198,7 @@ const Sidebar = () => {
             </span>
           </div>
 
-          <section className='mt-3 flex-1 space-y-2 overflow-y-auto'>
+          <section className='mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain'>
             {(isUsersLoading || isSearchingUsers) && (
               <div className='space-y-2'>
                 {[1, 2, 3, 4].map((item) => (
