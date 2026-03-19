@@ -83,7 +83,7 @@ export const searchUsers = asyncHandler(async (req, res) => {
     });
   }
 
-  const users = await UserService.searchUsers(q, parseInt(limit, 10));
+  const users = await UserService.searchUsers(q, parseInt(limit, 10), req.user._id);
 
   res.json({
     success: true,

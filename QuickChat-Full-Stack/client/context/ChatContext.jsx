@@ -12,6 +12,7 @@ export const ChatProvider = ({ children }) => {
   const [typingTimeout, setTypingTimeout] = useState(null);
   const [isUsersLoading, setIsUsersLoading] = useState(false);
   const [isMessagesLoading, setIsMessagesLoading] = useState(false);
+  const [isSearchingUsers, setIsSearchingUsers] = useState(false);
 
   const { socket, apiClient, authUser } = useAuth();
 
@@ -49,6 +50,28 @@ export const ChatProvider = ({ children }) => {
     }
   }, [apiClient]);
 
+  const searchUsers = useCallback(async (query) => {
+    const value = query.trim();
+    if (!value) {
+      await getUsers();
+      return;
+    }
+
+    setIsSearchingUsers(true);
+    try {
+      const { data } = await apiClient.get('/api/auth/search', {
+        params: { q: value, limit: 25 },
+      });
+      if (data.success) {
+        setUsers(data.users);
+      }
+    } catch (error) {
+      toast.error(extractErrorMessage(error, 'Failed to search users'));
+    } finally {
+      setIsSearchingUsers(false);
+    }
+  }, [apiClient, getUsers]);
+
   const sendMessage = useCallback(async (messageData) => {
     if (!selectedUser?._id) {
       throw new Error('Please select a user before sending a message');
@@ -79,6 +102,7 @@ export const ChatProvider = ({ children }) => {
       setMessages([]);
       setSelectedUser(null);
       setUnseenMessages({});
+      setIsSearchingUsers(false);
       return;
     }
 
@@ -136,6 +160,7 @@ export const ChatProvider = ({ children }) => {
     selectedUser,
     getUsers,
     getMessages,
+    searchUsers,
     sendMessage,
     setSelectedUser,
     unseenMessages,
@@ -145,13 +170,16 @@ export const ChatProvider = ({ children }) => {
     setTypingTimeout,
     isUsersLoading,
     isMessagesLoading,
+    isSearchingUsers,
   }), [
     getMessages,
     getUsers,
+    isSearchingUsers,
     isMessagesLoading,
     isTyping,
     isUsersLoading,
     messages,
+    searchUsers,
     selectedUser,
     sendMessage,
     typingTimeout,

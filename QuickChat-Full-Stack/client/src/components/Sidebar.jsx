@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth, useChat, useTheme } from '../../context';
 import assets from '../assets/assets';
@@ -9,8 +9,10 @@ const Sidebar = () => {
     users,
     selectedUser,
     setSelectedUser,
+    searchUsers,
     unseenMessages,
     setUnseenMessages,
+    isSearchingUsers,
     isUsersLoading,
   } = useChat();
 
@@ -24,7 +26,11 @@ const Sidebar = () => {
   const filteredUsers = useMemo(() => {
     if (!query) return users;
     const value = query.toLowerCase().trim();
-    return users.filter((user) => user.fullName.toLowerCase().includes(value));
+    return users.filter((user) => {
+      return [user.fullName, user.email, user.bio]
+        .filter(Boolean)
+        .some((field) => field.toLowerCase().includes(value));
+    });
   }, [query, users]);
 
   const totalUnseen = useMemo(() => {
@@ -43,6 +49,16 @@ const Sidebar = () => {
     setShowDashboard(false);
     logout();
   };
+
+  useEffect(() => {
+    if (showDashboard) return undefined;
+
+    const timeout = setTimeout(() => {
+      searchUsers(query);
+    }, query.trim() ? 250 : 0);
+
+    return () => clearTimeout(timeout);
+  }, [query, searchUsers, showDashboard]);
 
   return (
     <aside className={`h-full border-r p-4 md:p-5 ${selectedUser ? 'hidden md:flex' : 'flex'} flex-col ${isDark ? 'border-white/10 bg-slate-950/30' : 'border-slate-200/70 bg-white/30'}`}>
@@ -161,18 +177,29 @@ const Sidebar = () => {
               type='search'
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder='Search contacts...'
+              placeholder='Search people, email, or bio...'
               className={`w-full bg-transparent text-sm outline-none ${isDark ? 'text-white placeholder-slate-400' : 'text-slate-900 placeholder-slate-500'}`}
             />
+            {query && (
+              <button
+                type='button'
+                onClick={() => setQuery('')}
+                className={`rounded-full px-2 py-1 text-[11px] font-medium ${isDark ? 'bg-white/8 text-slate-300' : 'bg-slate-100 text-slate-600'}`}
+              >
+                Clear
+              </button>
+            )}
           </div>
 
           <div className='mt-3 flex items-center justify-between px-1'>
             <p className={`text-[11px] uppercase tracking-[0.22em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Current orbit</p>
-            <span className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{filteredUsers.length} shown</span>
+            <span className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              {isSearchingUsers ? 'Searching…' : `${filteredUsers.length} shown`}
+            </span>
           </div>
 
           <section className='mt-3 flex-1 space-y-2 overflow-y-auto'>
-            {isUsersLoading && (
+            {(isUsersLoading || isSearchingUsers) && (
               <div className='space-y-2'>
                 {[1, 2, 3, 4].map((item) => (
                   <div key={item} className={`h-20 animate-pulse rounded-2xl ${isDark ? 'bg-slate-800/70' : 'bg-slate-200/70'}`} />
@@ -180,13 +207,13 @@ const Sidebar = () => {
               </div>
             )}
 
-            {!isUsersLoading && filteredUsers.length === 0 && (
+            {!isUsersLoading && !isSearchingUsers && filteredUsers.length === 0 && (
               <div className={`rounded-[26px] border px-4 py-8 text-center text-sm ${isDark ? 'border-white/8 bg-slate-900/60 text-slate-400' : 'border-slate-200 bg-white text-slate-500'}`}>
-                {query ? 'No contacts matched your search.' : 'No users available yet.'}
+                {query ? 'No people matched your search yet. Try a name, email, or bio keyword.' : 'No users available yet.'}
               </div>
             )}
 
-            {!isUsersLoading && filteredUsers.map((user) => {
+            {!isUsersLoading && !isSearchingUsers && filteredUsers.map((user) => {
               const online = onlineUsers.includes(user._id);
               const unseen = unseenMessages[user._id] || 0;
 
