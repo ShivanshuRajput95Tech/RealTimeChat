@@ -5,6 +5,16 @@ import assets from '../assets/assets';
 import Dashboard from './Dashboard';
 import UserCard from './ui/UserCard';
 
+const navItems = [
+  { id: 'chats', label: 'Chats', icon: '💬' },
+  { id: 'contacts', label: 'Contacts', icon: '👤' },
+  { id: 'notifications', label: 'Alerts', icon: '🔔' },
+  { id: 'favorites', label: 'Saved', icon: '⭐' },
+];
+
+const quickTabs = ['Chat', 'Call', 'Contact'];
+const conversationModes = ['Direct', 'Group'];
+
 const Sidebar = () => {
   const {
     users,
@@ -19,20 +29,39 @@ const Sidebar = () => {
 
   const { authUser, logout, onlineUsers } = useAuth();
   const { isDark, toggleTheme } = useTheme();
-
-  const [query, setQuery] = useState('');
-  const [showDashboard, setShowDashboard] = useState(false);
   const navigate = useNavigate();
 
+  const [query, setQuery] = useState('');
+  const [activeRail, setActiveRail] = useState('chats');
+  const [activeQuickTab, setActiveQuickTab] = useState('Chat');
+  const [conversationMode, setConversationMode] = useState('Direct');
+
+  const totalUnseen = useMemo(() => Object.values(unseenMessages).reduce((a, b) => a + (b || 0), 0), [unseenMessages]);
+
+  const statusUsers = useMemo(() => users.slice(0, 5), [users]);
+
   const filteredUsers = useMemo(() => {
-    if (!query) return users;
-    const value = query.toLowerCase().trim();
-    return users.filter((user) => {
-      return [user.fullName, user.email, user.bio]
-        .filter(Boolean)
-        .some((field) => field.toLowerCase().includes(value));
-    });
-  }, [query, users]);
+    let list = users;
+
+    if (query.trim()) {
+      const value = query.toLowerCase().trim();
+      list = list.filter((user) => [user.fullName, user.email, user.bio].filter(Boolean).some((field) => field.toLowerCase().includes(value)));
+    }
+
+    if (activeQuickTab === 'Call') {
+      return [];
+    }
+
+    if (activeQuickTab === 'Contact') {
+      return [...list].sort((a, b) => a.fullName.localeCompare(b.fullName));
+    }
+
+    if (conversationMode === 'Group') {
+      return [];
+    }
+
+    return list;
+  }, [activeQuickTab, conversationMode, query, users]);
 
   const organizedUsers = useMemo(() => {
     return [...filteredUsers].sort((a, b) => {
@@ -52,198 +81,207 @@ const Sidebar = () => {
     });
   }, [filteredUsers, onlineUsers, selectedUser?._id, unseenMessages]);
 
-  const totalUnseen = useMemo(() => {
-    return Object.values(unseenMessages).reduce((a, b) => a + (b || 0), 0);
-  }, [unseenMessages]);
-
-  const onlineCount = useMemo(() => onlineUsers.length, [onlineUsers]);
-
   const onSelectUser = (user) => {
     setSelectedUser(user);
-    setShowDashboard(false);
     setUnseenMessages((prev) => ({ ...prev, [user._id]: 0 }));
   };
 
-  const handleLogout = () => {
-    setShowDashboard(false);
-    logout();
-  };
-
   useEffect(() => {
-    if (showDashboard) return undefined;
+    if (activeRail !== 'chats') return undefined;
 
     const timeout = setTimeout(() => {
       searchUsers(query);
     }, query.trim() ? 250 : 0);
 
     return () => clearTimeout(timeout);
-  }, [query, searchUsers, showDashboard]);
+  }, [activeRail, query, searchUsers]);
+
+  const renderEmptyState = () => {
+    if (activeQuickTab === 'Call') return 'Call history is not available yet in this workspace.';
+    if (activeQuickTab === 'Contact') return 'No contacts matched your current search.';
+    if (conversationMode === 'Group') return 'Group conversations are not configured in this demo yet.';
+    return query ? 'No people matched your search yet. Try a name, email, or bio keyword.' : 'No users available yet.';
+  };
 
   return (
-    <aside className={`min-h-0 h-full border-r p-4 md:p-5 ${selectedUser ? 'hidden md:flex' : 'flex'} flex-col ${isDark ? 'border-white/10 bg-slate-950/30' : 'border-slate-200/70 bg-white/30'}`}>
-      <div className={`frost-panel rounded-[34px] border p-5 ${isDark ? 'border-white/10 bg-slate-900/62' : 'border-white/80 bg-white/78'}`}>
-        <div className='flex items-start justify-between gap-4'>
-          <div>
-            <p className={`text-[11px] uppercase tracking-[0.24em] ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>Messaging</p>
-            <h1 className={`mt-2 text-[28px] font-semibold ${isDark ? 'text-white' : 'text-slate-950'}`}>Chats</h1>
-            <p className={`mt-2 max-w-[220px] text-xs leading-5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Keep track of conversations, presence, and unread updates in one place.</p>
+    <aside className={`min-h-0 h-full border-r ${selectedUser ? 'hidden md:flex' : 'flex'} ${isDark ? 'border-white/10 bg-white/5' : 'border-slate-200/70 bg-white/40'}`}>
+      <div className={`hidden h-full w-[92px] shrink-0 flex-col items-center justify-between py-5 lg:flex ${isDark ? 'bg-[#05b38b] text-white' : 'bg-[#07b28a] text-white'}`}>
+        <div className='flex w-full flex-col items-center gap-5'>
+          <div className='flex h-16 w-16 items-center justify-center rounded-[28px] bg-white/20 shadow-lg'>
+            <img src={assets.logo_icon} alt='QuickChat logo' className='h-9 w-9' />
           </div>
 
-          <div className='flex gap-2'>
-            <button
-              type='button'
-              onClick={toggleTheme}
-              className={`rounded-2xl p-2.5 text-sm transition ${isDark ? 'bg-emerald-500/15 text-emerald-200 hover:bg-emerald-500/25' : 'bg-white text-emerald-700 shadow-sm hover:bg-emerald-50'}`}
-              title={isDark ? 'Light mode' : 'Dark mode'}
-            >
-              {isDark ? '☀️' : '🌙'}
-            </button>
-            <button
-              type='button'
-              onClick={() => navigate('/profile')}
-              className={`rounded-2xl p-2.5 text-sm transition ${isDark ? 'bg-sky-500/15 text-sky-200 hover:bg-sky-500/25' : 'bg-white text-sky-700 shadow-sm hover:bg-sky-50'}`}
-              title='Profile'
-            >
-              👤
-            </button>
+          <div className='flex flex-col gap-4'>
+            {navItems.map((item) => (
+              <button
+                key={item.id}
+                type='button'
+                onClick={() => setActiveRail(item.id === 'chats' ? 'chats' : 'overview')}
+                className={`flex h-14 w-14 items-center justify-center rounded-2xl text-2xl transition ${activeRail === (item.id === 'chats' ? 'chats' : 'overview') ? 'bg-white text-[#07b28a] shadow-lg' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                title={item.label}
+              >
+                <span aria-hidden='true'>{item.icon}</span>
+              </button>
+            ))}
           </div>
         </div>
 
-        <div className={`mt-5 rounded-[30px] border p-4 ${isDark ? 'border-white/10 bg-slate-950/55' : 'border-slate-200 bg-slate-50/80'}`}>
-          <div className='flex items-center gap-3'>
-            <div className='relative'>
+        <div className='flex flex-col gap-4'>
+          <button
+            type='button'
+            onClick={toggleTheme}
+            className='flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-2xl text-white transition hover:bg-white/20'
+            title={isDark ? 'Light mode' : 'Dark mode'}
+          >
+            {isDark ? '☀️' : '🌙'}
+          </button>
+          <button
+            type='button'
+            onClick={logout}
+            className='flex h-14 w-14 items-center justify-center rounded-2xl bg-white/10 text-2xl text-white transition hover:bg-white/20'
+            title='Sign out'
+          >
+            ↪
+          </button>
+        </div>
+      </div>
+
+      <div className={`flex min-w-0 flex-1 flex-col ${isDark ? 'bg-slate-950/55' : 'bg-white/85'}`}>
+        <div className={`halo-divider px-5 py-5 ${isDark ? 'bg-slate-900/80' : 'bg-white/92'}`}>
+          <div className='flex items-center justify-between gap-4'>
+            <div className='flex min-w-0 items-center gap-3'>
               <img
                 src={authUser?.profilePic || assets.avatar_icon}
                 alt='Current user'
-                className={`h-14 w-14 rounded-[22px] object-cover ${isDark ? 'border border-white/10' : 'border border-white shadow-md'}`}
+                className='h-16 w-16 rounded-full object-cover shadow-lg'
               />
-              <span className='orb-dot absolute -bottom-1 -right-1 h-3.5 w-3.5 rounded-full bg-emerald-400' />
+              <div className='min-w-0'>
+                <h2 className={`truncate text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{authUser?.fullName}</h2>
+                <p className={`mt-1 text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{totalUnseen > 0 ? 'Busy' : 'Available'}</p>
+              </div>
             </div>
-            <div className='min-w-0'>
-              <p className={`truncate text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{authUser?.fullName}</p>
-              <p className={`truncate text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>{authUser?.email}</p>
+            <div className='flex gap-2'>
+              <button
+                type='button'
+                onClick={() => navigate('/profile')}
+                className={`inline-flex h-12 w-12 items-center justify-center rounded-2xl text-xl ${isDark ? 'bg-emerald-500/12 text-emerald-200' : 'bg-emerald-50 text-emerald-700'}`}
+                title='Profile'
+              >
+                ⋮
+              </button>
             </div>
           </div>
         </div>
 
-        <div className='mt-4 grid grid-cols-3 gap-2.5'>
-          {[
-            { label: 'All', value: users.length },
-            { label: 'Online', value: onlineCount },
-            { label: 'Unread', value: totalUnseen },
-          ].map((item) => (
-            <div key={item.label} className={`rounded-[24px] border px-3 py-3 ${isDark ? 'border-white/8 bg-white/5' : 'border-slate-200 bg-slate-50/90'}`}>
-              <p className={`text-[10px] uppercase tracking-[0.18em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{item.label}</p>
-              <p className={`mt-2 text-xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{item.value}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+        {activeRail === 'overview' ? (
+          <div className='min-h-0 flex-1 overflow-y-auto px-4 py-4'>
+            <Dashboard />
+          </div>
+        ) : (
+          <>
+            <div className='space-y-5 px-5 py-5'>
+              <section>
+                <div className='mb-4 flex items-center justify-between'>
+                  <h3 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Status</h3>
+                  <button type='button' className='text-base font-medium text-[#07b28a]'>
+                    View all
+                  </button>
+                </div>
+                <div className='flex gap-4 overflow-x-auto pb-2'>
+                  {statusUsers.map((user) => {
+                    const online = onlineUsers.includes(user._id);
+                    return (
+                      <button key={user._id} type='button' onClick={() => onSelectUser(user)} className='min-w-[74px] text-center'>
+                        <div className='mx-auto flex h-[72px] w-[72px] items-center justify-center rounded-full border-[3px] border-[#07b28a] p-1'>
+                          <img src={user.profilePic || assets.avatar_icon} alt={user.fullName} className='h-full w-full rounded-full object-cover' />
+                        </div>
+                        <p className={`mt-2 truncate text-sm ${isDark ? 'text-slate-300' : 'text-slate-600'}`}>{online ? user.fullName.split(' ')[0] : 'My status'}</p>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
 
-      <div className='mt-4 flex gap-2.5'>
-        <button
-          type='button'
-          onClick={() => setShowDashboard(!showDashboard)}
-          className={`flex-1 rounded-[22px] px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] transition ${
-            showDashboard
-              ? 'bg-gradient-to-r from-emerald-500 to-sky-500 text-white shadow-lg'
-              : isDark
-                ? 'bg-slate-900/70 text-slate-300 hover:bg-slate-800'
-                : 'bg-white text-slate-700 shadow hover:bg-slate-50'
-          }`}
-        >
-          {showDashboard ? 'Close overview' : 'Overview'}
-        </button>
-        <button
-          type='button'
-          onClick={handleLogout}
-          className='flex-1 rounded-[22px] bg-rose-500/90 px-4 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-white transition hover:bg-rose-600'
-        >
-          Sign out
-        </button>
-      </div>
-
-      {showDashboard ? (
-        <div className='mt-4 min-h-0 flex-1 overflow-y-auto overscroll-contain'>
-          <Dashboard />
-        </div>
-      ) : (
-        <>
-          <div className={`mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[30px] border ${isDark ? 'border-white/8 bg-slate-900/55' : 'border-slate-200 bg-white/88'}`}>
-            <div className={`shrink-0 border-b px-4 py-4 ${isDark ? 'border-white/8' : 'border-slate-200'}`}>
-              <div className='flex items-center gap-3 rounded-[24px]'>
-                <svg className={`h-4 w-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} fill='currentColor' viewBox='0 0 20 20'>
-                  <path fillRule='evenodd' d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z' clipRule='evenodd'/>
-                </svg>
-                <input
-                  type='search'
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder='Search people, email, or bio...'
-                  className={`w-full bg-transparent text-sm outline-none ${isDark ? 'text-white placeholder-slate-400' : 'text-slate-900 placeholder-slate-500'}`}
-                />
-                {query && (
+              <section>
+                <div className='mb-4 flex items-center justify-between'>
+                  <h3 className={`text-2xl font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>Message ({users.length})</h3>
                   <button
                     type='button'
-                    onClick={() => setQuery('')}
-                    className={`rounded-full px-2 py-1 text-[11px] font-medium ${isDark ? 'bg-white/8 text-slate-300' : 'bg-slate-100 text-slate-600'}`}
+                    className={`flex h-12 w-12 items-center justify-center rounded-full text-xl ${isDark ? 'bg-white/8 text-slate-200' : 'bg-slate-100 text-slate-600'}`}
+                    title='Search'
                   >
-                    Clear
+                    ⌕
                   </button>
-                )}
-              </div>
-
-              <div className='mt-4 flex items-center justify-between'>
-                <div>
-                  <p className={`text-[11px] uppercase tracking-[0.22em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Recent chats</p>
-                  <p className={`mt-1 text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Sorted by active chat, unread messages, and online status.
-                  </p>
                 </div>
-                <span className={`rounded-full px-3 py-1 text-[11px] font-medium ${isDark ? 'bg-white/8 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
-                  {isSearchingUsers ? 'Searching…' : `${organizedUsers.length} shown`}
-                </span>
-              </div>
+
+                <div className='grid grid-cols-3 gap-3'>
+                  {quickTabs.map((item) => (
+                    <button
+                      key={item}
+                      type='button'
+                      onClick={() => setActiveQuickTab(item)}
+                      className={`rounded-full px-4 py-3 text-base font-semibold ${activeQuickTab === item ? 'bg-[#07b28a] text-white shadow-lg' : isDark ? 'bg-white/8 text-slate-300' : 'bg-slate-100 text-slate-700'}`}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+
+                <div className='mt-3 grid grid-cols-2 gap-3'>
+                  {conversationModes.map((item) => (
+                    <button
+                      key={item}
+                      type='button'
+                      onClick={() => setConversationMode(item)}
+                      className={`rounded-2xl px-4 py-3 text-xl font-semibold ${conversationMode === item ? 'bg-[#07b28a] text-white shadow-lg' : isDark ? 'bg-white/8 text-slate-300' : 'bg-slate-100 text-slate-700'}`}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+
+                <div className={`mt-4 flex items-center gap-3 rounded-[24px] px-4 py-3 ${isDark ? 'bg-white/6' : 'bg-slate-100'}`}>
+                  <span className={`text-lg ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>⌕</span>
+                  <input
+                    type='search'
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    placeholder='Search messages, contacts, or bio...'
+                    className={`w-full bg-transparent text-sm outline-none ${isDark ? 'text-white placeholder-slate-400' : 'text-slate-900 placeholder-slate-500'}`}
+                  />
+                </div>
+              </section>
             </div>
 
-            <section className='min-h-0 flex-1 space-y-2 overflow-y-auto p-3 overscroll-contain'>
-              {(isUsersLoading || isSearchingUsers) && (
-                <div className='space-y-2'>
-                  {[1, 2, 3, 4].map((item) => (
-                    <div key={item} className={`h-20 animate-pulse rounded-2xl ${isDark ? 'bg-slate-800/70' : 'bg-slate-200/70'}`} />
+            <div className='min-h-0 flex-1 overflow-y-auto border-t border-slate-200/15'>
+              {(isUsersLoading || isSearchingUsers) && activeQuickTab === 'Chat' && conversationMode === 'Direct' ? (
+                <div className='space-y-3 p-5'>
+                  {[1, 2, 3].map((item) => (
+                    <div key={item} className={`h-24 animate-pulse rounded-[28px] ${isDark ? 'bg-white/6' : 'bg-slate-100'}`} />
+                  ))}
+                </div>
+              ) : organizedUsers.length === 0 ? (
+                <div className={`m-5 rounded-[28px] px-5 py-10 text-center text-sm ${isDark ? 'bg-white/6 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
+                  {renderEmptyState()}
+                </div>
+              ) : (
+                <div className='space-y-1 p-3'>
+                  {organizedUsers.map((user) => (
+                    <UserCard
+                      key={user._id}
+                      user={user}
+                      online={onlineUsers.includes(user._id)}
+                      unseen={unseenMessages[user._id] || 0}
+                      selected={selectedUser?._id === user._id}
+                      onSelect={onSelectUser}
+                    />
                   ))}
                 </div>
               )}
-
-              {!isUsersLoading && !isSearchingUsers && organizedUsers.length === 0 && (
-                <div className={`rounded-[26px] border px-4 py-8 text-center text-sm ${isDark ? 'border-white/8 bg-slate-900/60 text-slate-400' : 'border-slate-200 bg-white text-slate-500'}`}>
-                  {query ? 'No people matched your search yet. Try a name, email, or bio keyword.' : 'No users available yet.'}
-                </div>
-              )}
-
-              {!isUsersLoading && !isSearchingUsers && organizedUsers.map((user) => {
-                const online = onlineUsers.includes(user._id);
-                const unseen = unseenMessages[user._id] || 0;
-
-                return (
-                  <UserCard
-                    key={user._id}
-                    user={user}
-                    online={online}
-                    unseen={unseen}
-                    selected={selectedUser?._id === user._id}
-                    onSelect={onSelectUser}
-                  />
-                );
-              })}
-            </section>
-          </div>
-
-          <div className={`mt-4 rounded-[24px] border px-4 py-3 text-xs leading-5 ${isDark ? 'border-white/8 bg-white/5 text-slate-400' : 'border-slate-200 bg-white/70 text-slate-500'}`}>
-            Real-time messaging with clean organisation, search, and status visibility.
-          </div>
-        </>
-      )}
+            </div>
+          </>
+        )}
+      </div>
     </aside>
   );
 };

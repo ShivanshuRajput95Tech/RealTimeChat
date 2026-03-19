@@ -1,5 +1,4 @@
 import React from 'react';
-import StatusBadge from './StatusBadge';
 import assets from '../../assets/assets';
 import { useTheme } from '../../../context';
 
@@ -10,61 +9,49 @@ const UserCard = ({ user, onSelect, selected, online, unseen }) => {
     <button
       type='button'
       onClick={() => onSelect(user)}
-      className={`group relative w-full overflow-hidden rounded-[28px] border px-4 py-3.5 text-left transition-all duration-200 ${
+      className={`group relative w-full rounded-[28px] px-4 py-4 text-left transition-all duration-200 ${
         selected
           ? isDark
-            ? 'border-emerald-400/35 bg-[linear-gradient(135deg,rgba(16,185,129,0.22),rgba(15,23,42,0.22)_42%,rgba(6,182,212,0.12))] shadow-[0_16px_40px_rgba(16,185,129,0.16)]'
-            : 'border-emerald-300 bg-gradient-to-r from-emerald-50 via-white to-cyan-50 shadow-[0_14px_40px_rgba(16,185,129,0.10)]'
+            ? 'bg-emerald-500/12 ring-1 ring-emerald-400/20'
+            : 'bg-emerald-50 ring-1 ring-emerald-200'
           : isDark
-            ? 'border-white/8 bg-slate-900/45 hover:border-cyan-400/20 hover:bg-slate-900/70'
-            : 'border-slate-200 bg-white/88 hover:border-cyan-200 hover:bg-white'
+            ? 'hover:bg-white/6'
+            : 'hover:bg-slate-50'
       }`}
     >
-      <div className='absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-emerald-400 to-cyan-400 opacity-0 transition-opacity duration-200 group-hover:opacity-100' />
-
       <div className='flex items-center gap-3'>
         <div className='relative shrink-0'>
           <img
             src={user?.profilePic || assets.avatar_icon}
             alt={`${user?.fullName || 'User'} avatar`}
-            className={`h-12 w-12 rounded-2xl object-cover border shadow-lg ${isDark ? 'border-white/10' : 'border-slate-200'}`}
+            className='h-14 w-14 rounded-full object-cover shadow-md'
           />
-          <span className={`absolute -bottom-1 -right-1 block rounded-full ${isDark ? 'ring-4 ring-slate-900' : 'ring-4 ring-white'}`}>
-            <StatusBadge online={online} />
-          </span>
+          <span className={`absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 ${isDark ? 'border-slate-900' : 'border-white'} ${online ? 'bg-emerald-400' : isDark ? 'bg-slate-500' : 'bg-slate-300'}`} />
         </div>
 
         <div className='min-w-0 flex-1'>
-          <div className='flex items-center justify-between gap-2'>
-            <p className={`truncate text-sm font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{user.fullName}</p>
-            <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${online ? 'bg-emerald-500/15 text-emerald-400' : isDark ? 'bg-slate-700 text-slate-300' : 'bg-slate-100 text-slate-500'}`}>
-              {online ? 'Online' : 'Offline'}
-            </span>
+          <div className='flex items-start justify-between gap-3'>
+            <div className='min-w-0'>
+              <p className={`truncate text-base font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{user.fullName}</p>
+              <p className={`mt-1 truncate text-sm ${online ? 'text-emerald-400' : isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                {selected ? 'Open conversation' : unseen > 0 ? 'Typing…' : user.bio || 'Available for chat'}
+              </p>
+            </div>
+            <div className='shrink-0 text-right'>
+              <p className={`text-xs ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{unseen > 0 ? 'New' : 'Now'}</p>
+              {unseen > 0 && (
+                <span className='mt-2 inline-flex min-w-[28px] items-center justify-center rounded-full bg-emerald-500 px-2 py-1 text-[11px] font-semibold text-white'>
+                  {unseen > 99 ? '99+' : unseen}
+                </span>
+              )}
+            </div>
           </div>
 
-          <p className={`mt-1 truncate text-xs leading-5 ${isDark ? 'text-slate-300' : 'text-slate-500'}`}>
-            {user.bio || 'Ready to start a conversation'}
-          </p>
-
-          <div className='mt-2 flex items-center gap-2'>
-            <span className={`h-1.5 w-1.5 rounded-full ${online ? 'bg-emerald-400' : isDark ? 'bg-slate-500' : 'bg-slate-400'}`} />
-            <span className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-              {selected ? 'Open now' : unseen > 0 ? 'Unread updates' : online ? 'Available' : 'No new activity'}
+          <div className='mt-3 flex items-center gap-2'>
+            <span className={`inline-flex rounded-full px-2.5 py-1 text-[11px] font-medium ${selected ? (isDark ? 'bg-emerald-500/12 text-emerald-200' : 'bg-emerald-100 text-emerald-700') : isDark ? 'bg-white/6 text-slate-400' : 'bg-slate-100 text-slate-500'}`}>
+              {selected ? 'Selected' : online ? 'Online' : 'Offline'}
             </span>
           </div>
-        </div>
-
-        <div className='flex flex-col items-end gap-2'>
-          {selected && (
-            <span className={`text-[10px] font-medium ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>
-              Selected
-            </span>
-          )}
-          {unseen > 0 && (
-            <span className='inline-flex min-w-[24px] items-center justify-center rounded-full bg-gradient-to-r from-emerald-500 to-cyan-500 px-1.5 py-1 text-[11px] font-semibold text-white shadow-lg'>
-              {unseen > 99 ? '99+' : unseen}
-            </span>
-          )}
         </div>
       </div>
     </button>

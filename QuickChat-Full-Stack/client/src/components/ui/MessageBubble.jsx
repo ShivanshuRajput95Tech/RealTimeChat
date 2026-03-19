@@ -1,18 +1,12 @@
 import React from 'react';
-import { formatMessageTime } from '../../lib/utils';
-import assets from '../../assets/assets';
 import { useTheme } from '../../../context';
+import assets from '../../assets/assets';
+import { formatMessageTime } from '../../lib/utils';
 
 const MessageBubble = ({ msg, isMine, peerAvatar, myAvatar }) => {
   const { isDark } = useTheme();
   const showImage = msg.image && msg.image.trim() !== '';
   const showText = msg.text && msg.text.trim() !== '';
-
-  const bubbleClass = isMine
-    ? 'bg-[linear-gradient(135deg,#10b981_0%,#22c55e_45%,#14b8a6_100%)] text-white rounded-[22px_22px_8px_22px] shadow-[0_14px_32px_rgba(16,185,129,0.20)]'
-    : isDark
-      ? 'bg-slate-800/92 text-slate-100 rounded-[22px_22px_22px_8px] border border-white/6 shadow-[0_18px_34px_rgba(15,23,42,0.45)]'
-      : 'bg-white/96 text-slate-800 rounded-[22px_22px_22px_8px] border border-slate-200 shadow-[0_10px_24px_rgba(15,23,42,0.08)]';
 
   return (
     <div className={`flex max-w-full items-end gap-3 ${isMine ? 'justify-end' : 'justify-start'}`}>
@@ -20,54 +14,41 @@ const MessageBubble = ({ msg, isMine, peerAvatar, myAvatar }) => {
         <img
           src={peerAvatar || assets.avatar_icon}
           alt='sender avatar'
-          className={`h-8 w-8 rounded-full object-cover shadow-md ${isDark ? 'border border-white/10' : 'border border-slate-200'}`}
+          className='h-12 w-12 rounded-full object-cover shadow-md'
         />
       )}
 
-      <div className={`flex max-w-[min(100%,28rem)] flex-col ${isMine ? 'items-end' : 'items-start'}`}>
-        <div className={`relative overflow-hidden px-4 py-3.5 text-sm break-words transition-all duration-200 ${bubbleClass}`}>
-          {isMine && <div className='pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(255,255,255,0.24),transparent_30%)]' />}
+      <div className={`flex max-w-[min(100%,32rem)] flex-col ${isMine ? 'items-end' : 'items-start'}`}>
+        <div
+          className={`relative overflow-hidden rounded-[30px] px-5 py-4 text-base shadow-lg ${
+            isMine
+              ? 'bg-[#07b28a] text-white rounded-br-[10px]'
+              : isDark
+                ? 'bg-slate-900/88 text-slate-100 rounded-bl-[10px]'
+                : 'bg-white text-slate-900 rounded-bl-[10px]'
+          }`}
+        >
           {showImage && (
-            <button
-              type='button'
-              onClick={() => window.open(msg.image, '_blank')}
-              className='mb-2 overflow-hidden rounded-2xl'
-            >
-              <img
-                src={msg.image}
-                alt='attachment'
-                className='max-h-56 w-full max-w-sm rounded-2xl object-cover transition duration-200 hover:scale-[1.02]'
-              />
+            <button type='button' onClick={() => window.open(msg.image, '_blank')} className='mb-3 overflow-hidden rounded-[24px]'>
+              <img src={msg.image} alt='attachment' className='max-h-64 w-full max-w-sm rounded-[24px] object-cover' />
             </button>
           )}
 
-          {showText && <p className='whitespace-pre-wrap leading-6'>{msg.text}</p>}
-
-          <div className='mt-3 flex items-center gap-1.5'>
-            <time className={`text-[11px] font-medium ${isMine ? 'text-emerald-50' : isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-              {formatMessageTime(msg.createdAt)}
-            </time>
-
-            {isMine && (
-              <span className={`text-xs ${msg.seen ? 'text-sky-100' : 'text-emerald-100/80'}`} title={msg.seen ? 'Seen' : 'Sent'}>
-                {msg.seen ? '✓✓' : '✓'}
-              </span>
-            )}
-          </div>
+          {showText && <p className='whitespace-pre-wrap leading-7'>{msg.text}</p>}
         </div>
 
-        {msg.editedAt && (
-          <span className={`mt-1 px-1 text-[10px] italic ${isMine ? 'text-slate-400' : isDark ? 'text-slate-500' : 'text-slate-400'}`}>
-            edited
-          </span>
-        )}
+        <div className={`mt-2 flex items-center gap-2 px-1 text-sm ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+          {isMine && <span className='text-[#07b28a]'>✓✓</span>}
+          <time>{formatMessageTime(msg.createdAt)}</time>
+          {msg.editedAt && <span>• edited</span>}
+        </div>
       </div>
 
       {isMine && (
         <img
           src={myAvatar || assets.avatar_icon}
           alt='my avatar'
-          className={`h-8 w-8 rounded-full object-cover shadow-md ${isDark ? 'border border-white/10' : 'border border-slate-200'}`}
+          className='h-12 w-12 rounded-full object-cover shadow-md'
         />
       )}
     </div>
