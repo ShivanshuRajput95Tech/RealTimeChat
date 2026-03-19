@@ -19,14 +19,14 @@ const HomePage = () => {
 
         <div className={`halo-divider hidden items-center justify-between px-7 py-5 lg:flex ${isDark ? 'bg-slate-950/35 text-white' : 'bg-white/40 text-slate-900'}`}>
           <div>
-            <p className={`text-[11px] uppercase tracking-[0.28em] ${isDark ? 'text-cyan-300' : 'text-cyan-600'}`}>Signature workspace</p>
-            <h2 className='font-display mt-2 text-xl font-semibold'>A crafted conversation canvas with rhythm, depth, and focus.</h2>
+            <p className={`text-[11px] uppercase tracking-[0.24em] ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>Secure messaging workspace</p>
+            <h2 className='mt-2 text-xl font-semibold'>Professional real-time conversations, organised for focus.</h2>
           </div>
           <div className='flex items-center gap-3'>
             <div className={`rounded-full border px-4 py-2 text-xs font-medium ${isDark ? 'border-white/10 bg-white/5 text-slate-300' : 'border-slate-200 bg-white/70 text-slate-600'}`}>
-              {selectedUser ? `In session with ${selectedUser.fullName}` : 'Select a person to enter the stream'}
+              {selectedUser ? `Chatting with ${selectedUser.fullName}` : 'Select a chat to get started'}
             </div>
-            <div className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${isDark ? 'bg-cyan-400/10 text-cyan-200' : 'bg-cyan-50 text-cyan-700'}`}>Live</div>
+            <div className={`rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.22em] ${isDark ? 'bg-emerald-400/10 text-emerald-200' : 'bg-emerald-50 text-emerald-700'}`}>Online</div>
           </div>
         </div>
 

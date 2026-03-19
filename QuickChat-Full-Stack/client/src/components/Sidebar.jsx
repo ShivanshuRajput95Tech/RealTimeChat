@@ -83,9 +83,9 @@ const Sidebar = () => {
       <div className={`frost-panel rounded-[34px] border p-5 ${isDark ? 'border-white/10 bg-slate-900/62' : 'border-white/80 bg-white/78'}`}>
         <div className='flex items-start justify-between gap-4'>
           <div>
-            <p className={`text-[11px] uppercase tracking-[0.28em] ${isDark ? 'text-cyan-300' : 'text-cyan-600'}`}>Message atelier</p>
-            <h1 className={`font-display mt-2 text-[30px] font-semibold ${isDark ? 'text-white' : 'text-slate-950'}`}>Chatify</h1>
-            <p className={`mt-2 max-w-[220px] text-xs leading-5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>A softer, more expressive messaging space built for daily flow.</p>
+            <p className={`text-[11px] uppercase tracking-[0.24em] ${isDark ? 'text-emerald-300' : 'text-emerald-700'}`}>Messaging</p>
+            <h1 className={`mt-2 text-[28px] font-semibold ${isDark ? 'text-white' : 'text-slate-950'}`}>Chats</h1>
+            <p className={`mt-2 max-w-[220px] text-xs leading-5 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>Keep track of conversations, presence, and unread updates in one place.</p>
           </div>
 
           <div className='flex gap-2'>
@@ -127,9 +127,9 @@ const Sidebar = () => {
 
         <div className='mt-4 grid grid-cols-3 gap-2.5'>
           {[
-            { label: 'Orbit', value: users.length },
-            { label: 'Live', value: onlineCount },
-            { label: 'Queue', value: totalUnseen },
+            { label: 'All', value: users.length },
+            { label: 'Online', value: onlineCount },
+            { label: 'Unread', value: totalUnseen },
           ].map((item) => (
             <div key={item.label} className={`rounded-[24px] border px-3 py-3 ${isDark ? 'border-white/8 bg-white/5' : 'border-slate-200 bg-slate-50/90'}`}>
               <p className={`text-[10px] uppercase tracking-[0.18em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>{item.label}</p>
@@ -213,9 +213,9 @@ const Sidebar = () => {
 
               <div className='mt-4 flex items-center justify-between'>
                 <div>
-                  <p className={`text-[11px] uppercase tracking-[0.22em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Current orbit</p>
+                  <p className={`text-[11px] uppercase tracking-[0.22em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Recent chats</p>
                   <p className={`mt-1 text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-                    Prioritised by active chat, unread updates, and presence.
+                    Sorted by active chat, unread messages, and online status.
                   </p>
                 </div>
                 <span className={`rounded-full px-3 py-1 text-[11px] font-medium ${isDark ? 'bg-white/8 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
@@ -258,7 +258,7 @@ const Sidebar = () => {
           </div>
 
           <div className={`mt-4 rounded-[24px] border px-4 py-3 text-xs leading-5 ${isDark ? 'border-white/8 bg-white/5 text-slate-400' : 'border-slate-200 bg-white/70 text-slate-500'}`}>
-            Smooth presence, media, and AI-assisted replies — all tuned for focused daily communication.
+            Real-time messaging with clean organisation, search, and status visibility.
           </div>
         </>
       )}
