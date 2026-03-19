@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { ChatContext, useAuth } from '.';
-import { extractErrorMessage } from '../src/lib/api';
+import { apiPaths, extractErrorMessage } from '../src/lib/api';
 
 export const ChatProvider = ({ children }) => {
   const [messages, setMessages] = useState([]);
@@ -19,7 +19,7 @@ export const ChatProvider = ({ children }) => {
   const getUsers = useCallback(async () => {
     setIsUsersLoading(true);
     try {
-      const { data } = await apiClient.get('/api/messages/users');
+      const { data } = await apiClient.get(apiPaths.messages.users);
       if (data.success) {
         setUsers(data.users);
         setUnseenMessages(data.unseenMessages);
@@ -39,7 +39,7 @@ export const ChatProvider = ({ children }) => {
 
     setIsMessagesLoading(true);
     try {
-      const { data } = await apiClient.get(`/api/messages/${userId}`);
+      const { data } = await apiClient.get(apiPaths.messages.byUser(userId));
       if (data.success) {
         setMessages(data.messages);
       }
@@ -59,7 +59,7 @@ export const ChatProvider = ({ children }) => {
 
     setIsSearchingUsers(true);
     try {
-      const { data } = await apiClient.get('/api/auth/search', {
+      const { data } = await apiClient.get(apiPaths.auth.search, {
         params: { q: value, limit: 25 },
       });
       if (data.success) {
@@ -77,7 +77,7 @@ export const ChatProvider = ({ children }) => {
       throw new Error('Please select a user before sending a message');
     }
 
-    const { data } = await apiClient.post(`/api/messages/send/${selectedUser._id}`, messageData);
+    const { data } = await apiClient.post(apiPaths.messages.send(selectedUser._id), messageData);
     if (!data.success) {
       throw new Error(data.message || 'Failed to send message');
     }
@@ -90,7 +90,7 @@ export const ChatProvider = ({ children }) => {
     if (!messageId) return;
 
     try {
-      await apiClient.put(`/api/messages/${messageId}/mark-read`);
+      await apiClient.put(apiPaths.messages.markRead(messageId));
     } catch (error) {
       toast.error(extractErrorMessage(error, 'Failed to mark message as read'));
     }

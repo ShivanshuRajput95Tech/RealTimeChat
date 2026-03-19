@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
 import { io } from 'socket.io-client';
 import { AuthContext } from '.';
-import { apiClient, backendUrl, extractErrorMessage, setAuthToken } from '../src/lib/api';
+import { apiClient, apiPaths, backendUrl, extractErrorMessage, setAuthToken } from '../src/lib/api';
 
 export const AuthProvider = ({ children }) => {
   const [token, setToken] = useState(() => localStorage.getItem('token'));
@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }) => {
 
     try {
       setAuthToken(token);
-      const { data } = await apiClient.get('/api/auth/check');
+      const { data } = await apiClient.get(apiPaths.auth.check);
       if (data.success) {
         setAuthUser(data.user);
         connectSocket(data.user, token);
@@ -87,7 +87,8 @@ export const AuthProvider = ({ children }) => {
 
   const login = useCallback(async (state, credentials) => {
     try {
-      const { data } = await apiClient.post(`/api/auth/${state}`, credentials);
+      const endpoint = state === 'signup' ? apiPaths.auth.signup : apiPaths.auth.login;
+      const { data } = await apiClient.post(endpoint, credentials);
       if (!data.success) {
         throw new Error(data.message || 'Authentication failed');
       }
@@ -112,7 +113,7 @@ export const AuthProvider = ({ children }) => {
 
   const updateProfile = useCallback(async (body) => {
     try {
-      const { data } = await apiClient.put('/api/auth/update-profile', body);
+      const { data } = await apiClient.put(apiPaths.auth.updateProfile, body);
       if (!data.success) {
         throw new Error(data.message || 'Profile update failed');
       }

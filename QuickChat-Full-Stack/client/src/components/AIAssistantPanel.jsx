@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import toast from 'react-hot-toast';
-import { apiClient, extractErrorMessage } from '../lib/api';
+import { apiClient, apiPaths, extractErrorMessage } from '../lib/api';
 import { useTheme } from '../../context';
 
 const toneConfig = {
@@ -50,14 +50,14 @@ const AIAssistantPanel = ({ selectedUser, messages, onSuggestionPick, compact = 
     try {
       if (action === 'summary') {
         const transcript = recentMessages.map((entry) => `${entry.sender}: ${entry.text}`).join('\n');
-        const { data } = await apiClient.post('/api/ai/summarize', { text: transcript });
+        const { data } = await apiClient.post(apiPaths.ai.summarize, { text: transcript });
         setSummary(data.data.summary);
         setKeyPoints(data.data.keyPoints || []);
       }
 
       if (action === 'suggestions') {
         const sourceText = latestIncomingText || recentMessages[recentMessages.length - 1]?.text;
-        const { data } = await apiClient.post('/api/ai/suggest', {
+        const { data } = await apiClient.post(apiPaths.ai.suggest, {
           messageText: sourceText,
           conversationContext: recentMessages,
         });
@@ -66,7 +66,7 @@ const AIAssistantPanel = ({ selectedUser, messages, onSuggestionPick, compact = 
 
       if (action === 'sentiment') {
         const sourceText = latestIncomingText || recentMessages[recentMessages.length - 1]?.text;
-        const { data } = await apiClient.post('/api/ai/sentiment', { text: sourceText });
+        const { data } = await apiClient.post(apiPaths.ai.sentiment, { text: sourceText });
         setSentiment(data.data.sentiment);
       }
     } catch (error) {

@@ -155,6 +155,7 @@ VITE_BACKEND_URL=http://localhost:5000
 | POST | `/api/auth/signup` | Register a new user |
 | POST | `/api/auth/login` | Login and return tokens |
 | GET | `/api/auth/check` | Validate the current token |
+| GET | `/api/auth/search?q=<term>&limit=25` | Search users by name, email, or bio |
 | PUT | `/api/auth/update-profile` | Update profile details |
 
 ### Messaging
@@ -170,6 +171,16 @@ VITE_BACKEND_URL=http://localhost:5000
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | GET | `/api/status` | Health/status check |
+
+### AI Assistant
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| POST | `/api/ai/summarize` | Summarize recent conversation context |
+| POST | `/api/ai/sentiment` | Analyze the tone of a message |
+| POST | `/api/ai/suggest` | Generate smart reply suggestions |
+| POST | `/api/ai/translate` | Translate a message into a target language |
+| POST | `/api/ai/detect-language` | Detect the language of a message |
+| POST | `/api/ai/filter` | Run lightweight content moderation |
 
 ## 🧪 Verification Commands
 
