@@ -33,6 +33,24 @@ const Sidebar = () => {
     });
   }, [query, users]);
 
+  const organizedUsers = useMemo(() => {
+    return [...filteredUsers].sort((a, b) => {
+      const aSelected = selectedUser?._id === a._id ? 1 : 0;
+      const bSelected = selectedUser?._id === b._id ? 1 : 0;
+      if (aSelected !== bSelected) return bSelected - aSelected;
+
+      const aUnseen = unseenMessages[a._id] || 0;
+      const bUnseen = unseenMessages[b._id] || 0;
+      if (aUnseen !== bUnseen) return bUnseen - aUnseen;
+
+      const aOnline = onlineUsers.includes(a._id) ? 1 : 0;
+      const bOnline = onlineUsers.includes(b._id) ? 1 : 0;
+      if (aOnline !== bOnline) return bOnline - aOnline;
+
+      return a.fullName.localeCompare(b.fullName);
+    });
+  }, [filteredUsers, onlineUsers, selectedUser?._id, unseenMessages]);
+
   const totalUnseen = useMemo(() => {
     return Object.values(unseenMessages).reduce((a, b) => a + (b || 0), 0);
   }, [unseenMessages]);
@@ -145,7 +163,7 @@ const Sidebar = () => {
       </div>
 
       {showDashboard ? (
-        <div className='mt-4 flex-1 space-y-3 overflow-y-auto'>
+        <div className='mt-4 min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-contain'>
           <div className={`rounded-[26px] border p-4 ${isDark ? 'border-white/8 bg-slate-900/60' : 'border-slate-200 bg-white'}`}>
             <p className={`text-[11px] uppercase tracking-[0.2em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Account</p>
             <p className={`mt-2 text-lg font-semibold ${isDark ? 'text-white' : 'text-slate-900'}`}>{authUser?.fullName}</p>
@@ -169,66 +187,75 @@ const Sidebar = () => {
         </div>
       ) : (
         <>
-          <div className={`mt-4 flex items-center gap-3 rounded-[28px] border px-4 py-3 ${isDark ? 'border-white/8 bg-slate-900/55' : 'border-slate-200 bg-white/90'}`}>
-            <svg className={`h-4 w-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} fill='currentColor' viewBox='0 0 20 20'>
-              <path fillRule='evenodd' d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z' clipRule='evenodd'/>
-            </svg>
-            <input
-              type='search'
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder='Search people, email, or bio...'
-              className={`w-full bg-transparent text-sm outline-none ${isDark ? 'text-white placeholder-slate-400' : 'text-slate-900 placeholder-slate-500'}`}
-            />
-            {query && (
-              <button
-                type='button'
-                onClick={() => setQuery('')}
-                className={`rounded-full px-2 py-1 text-[11px] font-medium ${isDark ? 'bg-white/8 text-slate-300' : 'bg-slate-100 text-slate-600'}`}
-              >
-                Clear
-              </button>
-            )}
-          </div>
-
-          <div className='mt-3 flex items-center justify-between px-1'>
-            <p className={`text-[11px] uppercase tracking-[0.22em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Current orbit</p>
-            <span className={`text-[11px] ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
-              {isSearchingUsers ? 'Searching…' : `${filteredUsers.length} shown`}
-            </span>
-          </div>
-
-          <section className='mt-3 min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain'>
-            {(isUsersLoading || isSearchingUsers) && (
-              <div className='space-y-2'>
-                {[1, 2, 3, 4].map((item) => (
-                  <div key={item} className={`h-20 animate-pulse rounded-2xl ${isDark ? 'bg-slate-800/70' : 'bg-slate-200/70'}`} />
-                ))}
-              </div>
-            )}
-
-            {!isUsersLoading && !isSearchingUsers && filteredUsers.length === 0 && (
-              <div className={`rounded-[26px] border px-4 py-8 text-center text-sm ${isDark ? 'border-white/8 bg-slate-900/60 text-slate-400' : 'border-slate-200 bg-white text-slate-500'}`}>
-                {query ? 'No people matched your search yet. Try a name, email, or bio keyword.' : 'No users available yet.'}
-              </div>
-            )}
-
-            {!isUsersLoading && !isSearchingUsers && filteredUsers.map((user) => {
-              const online = onlineUsers.includes(user._id);
-              const unseen = unseenMessages[user._id] || 0;
-
-              return (
-                <UserCard
-                  key={user._id}
-                  user={user}
-                  online={online}
-                  unseen={unseen}
-                  selected={selectedUser?._id === user._id}
-                  onSelect={onSelectUser}
+          <div className={`mt-4 flex min-h-0 flex-1 flex-col overflow-hidden rounded-[30px] border ${isDark ? 'border-white/8 bg-slate-900/55' : 'border-slate-200 bg-white/88'}`}>
+            <div className={`shrink-0 border-b px-4 py-4 ${isDark ? 'border-white/8' : 'border-slate-200'}`}>
+              <div className='flex items-center gap-3 rounded-[24px]'>
+                <svg className={`h-4 w-4 ${isDark ? 'text-slate-400' : 'text-slate-500'}`} fill='currentColor' viewBox='0 0 20 20'>
+                  <path fillRule='evenodd' d='M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z' clipRule='evenodd'/>
+                </svg>
+                <input
+                  type='search'
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder='Search people, email, or bio...'
+                  className={`w-full bg-transparent text-sm outline-none ${isDark ? 'text-white placeholder-slate-400' : 'text-slate-900 placeholder-slate-500'}`}
                 />
-              );
-            })}
-          </section>
+                {query && (
+                  <button
+                    type='button'
+                    onClick={() => setQuery('')}
+                    className={`rounded-full px-2 py-1 text-[11px] font-medium ${isDark ? 'bg-white/8 text-slate-300' : 'bg-slate-100 text-slate-600'}`}
+                  >
+                    Clear
+                  </button>
+                )}
+              </div>
+
+              <div className='mt-4 flex items-center justify-between'>
+                <div>
+                  <p className={`text-[11px] uppercase tracking-[0.22em] ${isDark ? 'text-slate-500' : 'text-slate-400'}`}>Current orbit</p>
+                  <p className={`mt-1 text-xs ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+                    Prioritised by active chat, unread updates, and presence.
+                  </p>
+                </div>
+                <span className={`rounded-full px-3 py-1 text-[11px] font-medium ${isDark ? 'bg-white/8 text-slate-300' : 'bg-slate-100 text-slate-600'}`}>
+                  {isSearchingUsers ? 'Searching…' : `${organizedUsers.length} shown`}
+                </span>
+              </div>
+            </div>
+
+            <section className='min-h-0 flex-1 space-y-2 overflow-y-auto p-3 overscroll-contain'>
+              {(isUsersLoading || isSearchingUsers) && (
+                <div className='space-y-2'>
+                  {[1, 2, 3, 4].map((item) => (
+                    <div key={item} className={`h-20 animate-pulse rounded-2xl ${isDark ? 'bg-slate-800/70' : 'bg-slate-200/70'}`} />
+                  ))}
+                </div>
+              )}
+
+              {!isUsersLoading && !isSearchingUsers && organizedUsers.length === 0 && (
+                <div className={`rounded-[26px] border px-4 py-8 text-center text-sm ${isDark ? 'border-white/8 bg-slate-900/60 text-slate-400' : 'border-slate-200 bg-white text-slate-500'}`}>
+                  {query ? 'No people matched your search yet. Try a name, email, or bio keyword.' : 'No users available yet.'}
+                </div>
+              )}
+
+              {!isUsersLoading && !isSearchingUsers && organizedUsers.map((user) => {
+                const online = onlineUsers.includes(user._id);
+                const unseen = unseenMessages[user._id] || 0;
+
+                return (
+                  <UserCard
+                    key={user._id}
+                    user={user}
+                    online={online}
+                    unseen={unseen}
+                    selected={selectedUser?._id === user._id}
+                    onSelect={onSelectUser}
+                  />
+                );
+              })}
+            </section>
+          </div>
 
           <div className={`mt-4 rounded-[24px] border px-4 py-3 text-xs leading-5 ${isDark ? 'border-white/8 bg-white/5 text-slate-400' : 'border-slate-200 bg-white/70 text-slate-500'}`}>
             Smooth presence, media, and AI-assisted replies — all tuned for focused daily communication.
