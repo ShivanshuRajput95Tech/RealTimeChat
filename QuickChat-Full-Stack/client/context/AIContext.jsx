@@ -213,6 +213,39 @@ export const AIProvider = ({ children }) => {
         }
     }, [axios]);
 
+    const generateMeetingNotes = useCallback(async (messages) => {
+        try {
+            setIsLoading(true);
+            const { data } = await axios.post("/api/ai/meeting-notes", { messages });
+            if (data.success) return data.notes;
+            return "";
+        } catch {
+            toast.error("Failed to generate meeting notes");
+            return "";
+        } finally {
+            setIsLoading(false);
+        }
+    }, [axios]);
+
+    const streamChat = useCallback(async (message, onChunk) => {
+        try {
+            setIsLoading(true);
+            setAiMessages(prev => [...prev, { role: "user", content: message }]);
+            const { data } = await axios.post("/api/ai/chat", {
+                message,
+                history: aiMessages,
+            });
+            if (data.success) {
+                setAiMessages(prev => [...prev, { role: "assistant", content: data.response }]);
+                if (onChunk) onChunk(data.response);
+            }
+        } catch {
+            toast.error("AI chat failed");
+        } finally {
+            setIsLoading(false);
+        }
+    }, [axios, aiMessages]);
+
     const clearAIChat = useCallback(() => setAiMessages([]), []);
     const clearSuggestions = useCallback(() => setSuggestions([]), []);
 

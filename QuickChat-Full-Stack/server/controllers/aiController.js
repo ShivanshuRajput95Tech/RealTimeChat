@@ -141,7 +141,7 @@ export const searchWithAI = async (req, res) => {
             Group.find({ members: userId }).distinct("_id"),
         ]);
 
-        const allMessages = await Message.find({
+        const baseQuery = {
             deleted: false,
             text: { $exists: true, $ne: "" },
             $or: [
@@ -150,14 +150,17 @@ export const searchWithAI = async (req, res) => {
                 { channelId: { $in: userChannelIds } },
                 { groupId: { $in: userGroupIds } },
             ],
+        };
+
+        const messagesWithEmbeddings = await Message.find({
+            ...baseQuery,
+            embedding: { $exists: true, $ne: [] },
         })
             .sort({ createdAt: -1 })
             .limit(200)
             .populate("senderId", "fullName profilePic")
             .select("text senderId receiverId channelId groupId createdAt embedding")
             .lean();
-
-        const messagesWithEmbeddings = allMessages.filter(m => m.embedding && m.embedding.length > 0);
 
         if (messagesWithEmbeddings.length > 10) {
             const relevantMessages = await aiService.ragSearch(query, messagesWithEmbeddings, 5);
@@ -178,9 +181,14 @@ export const searchWithAI = async (req, res) => {
             }
         }
 
-        const regexResults = allMessages
-            .filter(m => m.text && m.text.toLowerCase().includes(query.toLowerCase()))
-            .slice(0, 20);
+        const regexResults = await Message.find({
+            ...baseQuery,
+            text: { $regex: query, $options: "i" },
+        })
+            .sort({ createdAt: -1 })
+            .limit(20)
+            .populate("senderId", "fullName profilePic")
+            .lean();
 
         res.json({
             success: true,

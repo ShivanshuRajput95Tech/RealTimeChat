@@ -1,53 +1,10 @@
 import Channel from "../models/Channel.js";
 import Message from "../models/Message.js";
 import Workspace from "../models/Workspace.js";
-import User from "../models/User.js";
-import { safeEmitToUser, userSocketMap } from "../socket.js";
+import { safeEmitToUser, safeEmitToRoom } from "../socket.js";
 import cloudinary from "../lib/cloudinary.js";
 import logger from "../lib/logger.js";
-
-const trackChannelActivity = async (userId, channelId) => {
-    try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        await User.findByIdAndUpdate(userId, { lastActive: new Date() });
-
-        const existingActivity = await User.findOne({
-            _id: userId,
-            "weeklyActivity.date": today,
-        });
-
-        if (existingActivity) {
-            await User.findOneAndUpdate(
-                { _id: userId, "weeklyActivity.date": today },
-                {
-                    $inc: { "weeklyActivity.$.messageCount": 1 },
-                    $set: { "weeklyActivity.$.channelId": channelId },
-                }
-            );
-        } else {
-            await User.findByIdAndUpdate(userId, {
-                $push: {
-                    weeklyActivity: {
-                        date: today,
-                        messageCount: 1,
-                        channelId,
-                    },
-                },
-            });
-        }
-
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        await User.updateMany(
-            { _id: userId, "weeklyActivity.date": { $lt: weekAgo } },
-            { $pull: { weeklyActivity: { date: { $lt: weekAgo } } } }
-        );
-    } catch (err) {
-        logger.warn("Channel activity tracking failed:", err.message);
-    }
-};
+import { trackUserActivity } from "../lib/activityTracker.js";
 
 export const createChannel = async (req, res) => {
     try {
@@ -227,7 +184,7 @@ export const sendChannelMessage = async (req, res) => {
             });
         });
 
-        trackChannelActivity(req.user._id, channelId);
+        trackUserActivity(req.user._id, { channelId });
 
         res.status(201).json({ success: true, message: populatedMessage });
     } catch (error) {

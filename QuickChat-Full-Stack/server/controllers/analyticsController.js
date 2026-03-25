@@ -37,7 +37,7 @@ export const getAnalytics = async (req, res) => {
     ]);
 
     const channelMessages = await Message.aggregate([
-      { $match: { senderId: userId, channelId: { $exists: true }, ...(Object.keys(dateFilter).length && { createdAt: dateFilter }) } },
+      { $match: { senderId: userId, channelId: { $ne: null }, ...(Object.keys(dateFilter).length && { createdAt: dateFilter }) } },
       { $group: { _id: '$channelId', count: { $sum: 1 } } },
       { $sort: { count: -1 } },
       { $limit: 5 },
@@ -56,11 +56,11 @@ export const getAnalytics = async (req, res) => {
     ]);
 
     const responseTime = await Message.aggregate([
-      { $match: { receiverId: userId } },
+      { $match: { receiverId: userId, seenAt: { $exists: true, $ne: null } } },
       {
         $project: {
           responseTime: {
-            $subtract: ['$createdAt', '$readAt'],
+            $subtract: ['$seenAt', '$createdAt'],
           },
         },
       },

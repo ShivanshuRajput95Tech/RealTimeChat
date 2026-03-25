@@ -7,7 +7,8 @@ import { GroupContext } from '../../context/GroupContext'
 
 const IconSidebar = ({ view, setView, onOpenCommandPalette, onToggleAI, showAI }) => {
   const { authUser, logout } = useContext(AuthContext)
-  const { users, unseenMessages } = useContext(ChatContext)
+  const isAdmin = authUser?.email?.includes('admin')
+  const { unseenMessages } = useContext(ChatContext)
   const { workspaces } = useContext(WorkspaceContext)
   const { groups } = useContext(GroupContext)
   const navigate = useNavigate()
@@ -158,6 +159,17 @@ const IconSidebar = ({ view, setView, onOpenCommandPalette, onToggleAI, showAI }
                     </svg>
                     Edit Profile
                   </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => { navigate('/admin'); setShowMenu(false) }}
+                      className="w-full text-left px-4 py-2.5 text-sm text-zinc-300 hover:bg-white/5 flex items-center gap-3 cursor-pointer transition-colors"
+                    >
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      </svg>
+                      Admin Dashboard
+                    </button>
+                  )}
                   <button
                     onClick={() => { logout(); setShowMenu(false) }}
                     className="w-full text-left px-4 py-2.5 text-sm text-danger hover:bg-danger/10 flex items-center gap-3 cursor-pointer transition-colors"

@@ -9,6 +9,7 @@ const HomePage = lazy(() => import('./pages/HomePage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
 const ProfilePage = lazy(() => import('./pages/ProfilePage'))
 const ChatAppsComparison = lazy(() => import('./pages/ChatAppsComparison'))
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 
 const App = () => {
   const { authUser } = useContext(AuthContext)
@@ -35,6 +36,7 @@ const App = () => {
           <Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
           <Route path='/profile' element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
           <Route path='/compare' element={<ChatAppsComparison />} />
+          <Route path='/admin' element={authUser ? <AdminDashboard /> : <Navigate to="/login" />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>

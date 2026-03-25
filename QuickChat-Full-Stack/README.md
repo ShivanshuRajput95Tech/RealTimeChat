@@ -2,9 +2,11 @@
 
 A production-grade, real-time communication platform combining features from WhatsApp, Slack, and Discord with AI-first capabilities.
 
+**Version 3.0** - Enhanced with enterprise-grade security, performance optimizations, and comprehensive monitoring.
+
 ---
 
-## Quick Start
+## 🚀 Quick Start
 
 ```bash
 # 1. Install dependencies
@@ -140,6 +142,38 @@ cd client && npm run dev       # Terminal 2 - Frontend (port 5173)
 | Notification System | Done | In-app notifications for messages, mentions, reactions |
 | Unread Badge | Done | Real-time unread notification count |
 | Mark Read/Clear | Done | Mark individual or all notifications as read |
+
+---
+
+## 🛡️ Security & Performance (v3.0 Enhancements)
+
+### Security Features
+| Feature | Description |
+|---------|-------------|
+| Enhanced Security Middleware | Comprehensive protection with helmet, CORS, rate limiting, and input sanitization |
+| XSS Protection | Cross-site scripting protection using modern sanitization techniques |
+| NoSQL Injection Prevention | MongoDB query injection protection |
+| HTTP Parameter Pollution | Protection against parameter pollution attacks |
+| Rate Limiting | Separate rate limits for different endpoint types |
+| Request Validation | Enhanced validation with detailed error messages |
+
+### Performance Optimizations
+| Feature | Description |
+|---------|-------------|
+| Query Optimizer | Advanced query optimization with intelligent caching |
+| Database Index Recommendations | Automatic analysis and optimization suggestions |
+| Connection Pool Optimization | Dynamic pool sizing based on system resources |
+| Cursor-based Pagination | Efficient pagination for large datasets |
+| Response Compression | Smart compression with automatic filtering |
+| Cache Strategies | Multiple caching strategies for different data types |
+
+### Monitoring & Observability
+| Feature | Description |
+|---------|-------------|
+| Enhanced Health Checks | Comprehensive system monitoring |
+| Request ID Tracking | Unique IDs for debugging and tracing |
+| Performance Monitoring | Automatic slow request detection |
+| Structured Logging | Detailed logs with request context |
 
 ---
 

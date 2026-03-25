@@ -2,56 +2,10 @@ import Group from "../models/Group.js";
 import Message from "../models/Message.js";
 import User from "../models/User.js";
 import cloudinary from "../lib/cloudinary.js";
-import { safeEmitToUser, userSocketMap } from "../socket.js";
+import { safeEmitToUser } from "../socket.js";
 import logger from "../lib/logger.js";
 import { generateInviteCode } from "../lib/invite.js";
-
-const trackActivity = async (userId, groupId = null, channelId = null) => {
-    try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        await User.findByIdAndUpdate(userId, { lastActive: new Date() });
-
-        const existingActivity = await User.findOne({
-            _id: userId,
-            "weeklyActivity.date": today,
-        });
-
-        if (existingActivity) {
-            await User.findOneAndUpdate(
-                { _id: userId, "weeklyActivity.date": today },
-                {
-                    $inc: { "weeklyActivity.$.messageCount": 1 },
-                    $set: {
-                        "weeklyActivity.$.channelId": channelId || existingActivity.weeklyActivity[0].channelId,
-                        "weeklyActivity.$.groupId": groupId || existingActivity.weeklyActivity[0].groupId,
-                    },
-                }
-            );
-        } else {
-            await User.findByIdAndUpdate(userId, {
-                $push: {
-                    weeklyActivity: {
-                        date: today,
-                        messageCount: 1,
-                        channelId,
-                        groupId,
-                    },
-                },
-            });
-        }
-
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        await User.updateMany(
-            { _id: userId, "weeklyActivity.date": { $lt: weekAgo } },
-            { $pull: { weeklyActivity: { date: { $lt: weekAgo } } } }
-        );
-    } catch (err) {
-        logger.warn("Activity tracking failed:", err.message);
-    }
-};
+import { trackUserActivity } from "../lib/activityTracker.js";
 
 export const createGroup = async (req, res) => {
     try {
@@ -345,7 +299,7 @@ export const sendGroupMessage = async (req, res) => {
                 });
             });
 
-        trackActivity(req.user._id, groupId);
+        trackUserActivity(req.user._id, { groupId });
 
         res.status(201).json({ success: true, message: populatedMessage });
     } catch (error) {

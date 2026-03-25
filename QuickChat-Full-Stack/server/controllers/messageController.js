@@ -4,59 +4,13 @@ import Group from "../models/Group.js";
 import Channel from "../models/Channel.js";
 import Workspace from "../models/Workspace.js";
 import cloudinary from "../lib/cloudinary.js";
-import { safeEmit, safeEmitToUser, safeEmitToRoom, userSocketMap } from "../socket.js";
+import { safeEmitToUser, userSocketMap } from "../socket.js";
 import redis from "../lib/redis.js";
 import logger from "../lib/logger.js";
 import { createNotification } from "./notificationController.js";
 import aiService from "../services/aiService.js";
 import SentimentLog from "../models/SentimentLog.js";
-
-const updateUserActivity = async (userId, channelId = null, groupId = null) => {
-    try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-
-        await User.findByIdAndUpdate(userId, { lastActive: new Date() });
-
-        const existingActivity = await User.findOne({
-            _id: userId,
-            "weeklyActivity.date": today,
-        });
-
-        if (existingActivity) {
-            await User.findOneAndUpdate(
-                { _id: userId, "weeklyActivity.date": today },
-                {
-                    $inc: { "weeklyActivity.$.messageCount": 1 },
-                    $set: {
-                        "weeklyActivity.$.channelId": channelId || existingActivity.weeklyActivity[0].channelId,
-                        "weeklyActivity.$.groupId": groupId || existingActivity.weeklyActivity[0].groupId,
-                    },
-                }
-            );
-        } else {
-            await User.findByIdAndUpdate(userId, {
-                $push: {
-                    weeklyActivity: {
-                        date: today,
-                        messageCount: 1,
-                        channelId,
-                        groupId,
-                    },
-                },
-            });
-        }
-
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        await User.updateMany(
-            { _id: userId, "weeklyActivity.date": { $lt: weekAgo } },
-            { $pull: { weeklyActivity: { date: { $lt: weekAgo } } } }
-        );
-    } catch (err) {
-        logger.warn("Activity update failed:", err.message);
-    }
-};
+import { trackUserActivity } from "../lib/activityTracker.js";
 
 const processMessageInBackground = (message) => {
     if (!message.text || message.text.length < 10) return;
@@ -340,7 +294,7 @@ export const sendMessage = async (req, res) => {
         await redis.del(`messages:${receiverId}:${senderId}:all:50`);
 
         processMessageInBackground(newMessage);
-        updateUserActivity(senderId);
+        trackUserActivity(senderId);
 
         res.status(201).json({ success: true, newMessage: populatedMessage });
     } catch (error) {

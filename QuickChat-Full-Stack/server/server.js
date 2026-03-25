@@ -1,15 +1,12 @@
 import express from "express";
 import "dotenv/config";
-import cors from "cors";
-import helmet from "helmet";
-import compression from "compression";
 import http from "http";
-import crypto from "crypto";
 import mongoose from "mongoose";
 import { connectDB } from "./lib/db.js";
 import { redis } from "./lib/redis.js";
 import logger from "./lib/logger.js";
-import { generalLimiter } from "./middleware/rateLimiter.js";
+import { securityMiddleware, requestTiming, requestId, compressionMiddleware, maintenanceMode } from "./middleware/security.js";
+import { errorHandler, notFoundHandler } from "./middleware/errorHandler.js";
 import userRouter from "./routes/userRoutes.js";
 import messageRouter from "./routes/messageRoutes.js";
 import workspaceRouter from "./routes/workspaceRoutes.js";
@@ -40,40 +37,71 @@ initSocketIO(server, {
     credentials: true,
 });
 
-// Request ID middleware
-app.use((req, res, next) => {
-    req.id = crypto.randomUUID();
-    res.setHeader("X-Request-Id", req.id);
-    next();
-});
+// Apply enhanced security middleware
+securityMiddleware(app);
+compressionMiddleware(app);
+requestTiming(app);
+requestId(app);
+maintenanceMode(app);
 
-// Security & performance middleware
-app.use(helmet({
-    contentSecurityPolicy: false,
-    crossOriginEmbedderPolicy: false,
-}));
-app.use(compression());
+// Body parsing middleware with size limits
 app.use(express.json({ limit: "10mb" }));
 app.use(express.urlencoded({ extended: true, limit: "10mb" }));
-app.use(cors({
-    origin: process.env.CLIENT_URL || "*",
-    credentials: true,
-    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
-    allowedHeaders: ["Content-Type", "Authorization"],
-}));
-app.use(generalLimiter);
 
-// Health check
+// Health check with comprehensive monitoring
 app.get("/api/status", (req, res) => {
+    const memoryUsage = process.memoryUsage();
+    const uptime = process.uptime();
+    
     res.json({
         status: "ok",
         timestamp: new Date().toISOString(),
-        uptime: process.uptime(),
-        database: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
-        redis: (() => { try { return redis.isReady() ? "connected" : "disconnected" } catch { return "disconnected" } })(),
-        memory: process.memoryUsage(),
+        uptime: {
+            seconds: uptime,
+            formatted: formatUptime(uptime),
+        },
+        database: {
+            status: mongoose.connection.readyState === 1 ? "connected" : "disconnected",
+            readyState: mongoose.connection.readyState,
+        },
+        redis: {
+            status: (() => { try { return redis.isReady() ? "connected" : "disconnected" } catch { return "disconnected" } })(),
+            isConnected: (() => { try { return redis.isReady() } catch { return false } })(),
+        },
+        memory: {
+            rss: formatBytes(memoryUsage.rss),
+            heapTotal: formatBytes(memoryUsage.heapTotal),
+            heapUsed: formatBytes(memoryUsage.heapUsed),
+            external: formatBytes(memoryUsage.external),
+            raw: memoryUsage,
+        },
+        system: {
+            platform: process.platform,
+            nodeVersion: process.version,
+            pid: process.pid,
+            arch: process.arch,
+            env: process.env.NODE_ENV || "development",
+        },
     });
 });
+
+// Helper function to format uptime
+const formatUptime = (seconds) => {
+    const days = Math.floor(seconds / 86400);
+    const hours = Math.floor((seconds % 86400) / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = Math.floor(seconds % 60);
+    
+    return `${days}d ${hours}h ${minutes}m ${secs}s`;
+};
+
+// Helper function to format bytes
+const formatBytes = (bytes) => {
+    const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+    if (bytes === 0) return "0 Bytes";
+    const i = Math.floor(Math.log(bytes) / Math.log(1024));
+    return `${(bytes / Math.pow(1024, i)).toFixed(2)} ${sizes[i]}`;
+};
 
 // Routes
 app.use("/api/auth", userRouter);
@@ -91,20 +119,11 @@ app.use("/api/messages/enhanced", enhancedMessageRouter);
 app.use("/api/notes", noteRouter);
 app.use("/api/analytics", analyticsRouter);
 
-// 404 handler
-app.use((req, res) => {
-    res.status(404).json({ success: false, message: "Route not found" });
-});
+// 404 handler for undefined routes
+app.use(notFoundHandler);
 
-// Global error handler
-app.use((err, req, res, next) => {
-    logger.error(`[${req.id}] Unhandled error:`, err.stack || err.message);
-    const status = err.status || err.statusCode || 500;
-    res.status(status).json({
-        success: false,
-        message: process.env.NODE_ENV === "development" ? err.message : "Internal server error",
-    });
-});
+// Global error handler (must be after all routes)
+app.use(errorHandler);
 
 // Graceful shutdown
 let isShuttingDown = false;
