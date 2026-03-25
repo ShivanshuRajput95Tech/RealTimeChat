@@ -1,9 +1,9 @@
 import React, { useContext, useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AuthContext } from '../../context/AuthContext'
-import { ChatContext } from '../../context/ChatContext'
-import { WorkspaceContext } from '../../context/WorkspaceContext'
-import { GroupContext } from '../../context/GroupContext'
+import { AuthContext } from '../context/AuthContext'
+import { ChatContext } from '../context/ChatContext'
+import { WorkspaceContext } from '../context/WorkspaceContext'
+import { GroupContext } from '../context/GroupContext'
 
 const MobileSidebar = ({ isOpen, onClose, view, setView }) => {
   const { authUser, logout } = useContext(AuthContext)

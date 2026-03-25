@@ -1,15 +1,14 @@
 import React, { useContext, useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { formatMessageTime } from '../lib/utils'
-import { ChatContext } from '../../context/ChatContext'
-import { AuthContext } from '../../context/AuthContext'
+import { ChatContext } from '../context/ChatContext'
+import { AuthContext } from '../context/AuthContext'
 import EmojiPicker from './EmojiPicker'
 import VoiceRecorderButton from './VoiceRecorderButton'
 import WritingCoach from './WritingCoach'
 import ScheduleMessageModal from './ScheduleMessageModal'
 import ScheduledMessagesPanel from './ScheduledMessagesPanel'
 import toast from 'react-hot-toast'
-
-const QUICK_EMOJIS = ['👍', '❤️', '😂', '😮', '😢', '🎉']
+import { QUICK_EMOJIS } from '../constants'
 
 const MessageStatus = React.memo(({ status }) => {
   if (status === 'sending') {

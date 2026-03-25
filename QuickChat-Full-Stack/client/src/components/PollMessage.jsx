@@ -1,7 +1,7 @@
 import React, { useContext, useState, useRef, useEffect } from 'react'
-import { AIContext } from '../../context/AIContext'
-import { ChatContext } from '../../context/ChatContext'
-import { WorkspaceContext } from '../../context/WorkspaceContext'
+import { AIContext } from '../context/AIContext'
+import { ChatContext } from '../context/ChatContext'
+import { WorkspaceContext } from '../context/WorkspaceContext'
 import toast from 'react-hot-toast'
 
 const POLL_EMOJIS = ['1️⃣', '2️⃣', '3️⃣', '4️⃣', '5️⃣', '6️⃣', '7️⃣', '8️⃣', '9️⃣', '🔟']

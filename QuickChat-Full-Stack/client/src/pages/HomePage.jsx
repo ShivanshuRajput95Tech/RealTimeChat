@@ -13,11 +13,13 @@ import SearchModal from '../components/SearchModal'
 import MessageTemplatesPanel from '../components/MessageTemplatesPanel'
 import NotesPanel from '../components/NotesPanel'
 import { useCallManager } from '../components/CallManager'
-import { ChatContext } from '../../context/ChatContext'
-import { WorkspaceContext } from '../../context/WorkspaceContext'
-import { GroupContext } from '../../context/GroupContext'
-import { AuthContext } from '../../context/AuthContext'
-import { AIContext } from '../../context/AIContext'
+import { ChatContext } from '../context/ChatContext'
+import { WorkspaceContext } from '../context/WorkspaceContext'
+import { GroupContext } from '../context/GroupContext'
+import { AuthContext } from '../context/AuthContext'
+import { AIContext } from '../context/AIContext'
+import { getGreeting, getFirstName } from '../lib/utils'
+import { STATS_DATA } from '../constants'
 
 const ChatThreeBackground = lazy(() => import('../components/ChatThreeBackground').catch(() => ({ default: () => null })))
 

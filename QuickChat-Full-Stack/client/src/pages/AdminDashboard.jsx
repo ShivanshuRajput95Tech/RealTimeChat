@@ -1,6 +1,6 @@
 import React, { useState, useContext, Suspense } from 'react'
 import { useNavigate, Navigate } from 'react-router-dom'
-import { AuthContext } from '../../context/AuthContext'
+import { AuthContext } from '../context/AuthContext'
 
 const AdminDashboard = () => {
   const { authUser } = useContext(AuthContext)
@@ -11,6 +11,10 @@ const AdminDashboard = () => {
   if (!authUser || !authUser.email?.includes('admin')) {
     return <Navigate to="/" replace />
   }
+
+  React.useEffect(() => {
+    console.log('AdminDashboard mounted');
+  }, []);
 
   const tabs = [
     { id: 'read', label: 'Read', icon: 'M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z' },

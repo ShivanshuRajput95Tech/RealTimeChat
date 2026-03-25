@@ -1,7 +1,7 @@
 import React, { useContext, useCallback } from 'react'
-import { VoiceContext } from '../../context/VoiceContext'
-import { ChatContext } from '../../context/ChatContext'
-import { WorkspaceContext } from '../../context/WorkspaceContext'
+import { VoiceContext } from '../context/VoiceContext'
+import { ChatContext } from '../context/ChatContext'
+import { WorkspaceContext } from '../context/WorkspaceContext'
 import toast from 'react-hot-toast'
 
 const VoiceRecorderButton = () => {

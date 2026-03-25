@@ -1,6 +1,6 @@
 import React, { useContext, useState, Suspense, lazy } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AuthContext } from '../../context/AuthContext'
+import { AuthContext } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 
 const LiquidGlass3DBackground = lazy(() => import('../components/LiquidGlass3DBackground').catch(() => ({ default: () => null })))

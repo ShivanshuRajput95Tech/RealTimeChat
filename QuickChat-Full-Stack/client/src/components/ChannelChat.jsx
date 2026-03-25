@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState, useRef, useCallback, useMemo } from 'react'
-import { AuthContext } from '../../context/AuthContext'
-import { WorkspaceContext } from '../../context/WorkspaceContext'
-import { ChatContext } from '../../context/ChatContext'
+import { AuthContext } from '../context/AuthContext'
+import { WorkspaceContext } from '../context/WorkspaceContext'
+import { ChatContext } from '../context/ChatContext'
 import { formatMessageTime } from '../lib/utils'
 import toast from 'react-hot-toast'
 

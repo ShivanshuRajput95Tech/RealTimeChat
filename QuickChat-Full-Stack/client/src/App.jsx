@@ -3,7 +3,8 @@ import { Navigate, Route, Routes } from 'react-router-dom'
 import ErrorBoundary from './components/ErrorBoundary'
 import AppLoader from './components/AppLoader'
 import { Toaster } from "react-hot-toast"
-import { AuthContext } from '../context/AuthContext'
+import { AuthContext } from './context/AuthContext'
+import { TOAST_OPTIONS } from './constants'
 
 const HomePage = lazy(() => import('./pages/HomePage'))
 const LoginPage = lazy(() => import('./pages/LoginPage'))
@@ -12,31 +13,24 @@ const ChatAppsComparison = lazy(() => import('./pages/ChatAppsComparison'))
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'))
 
 const App = () => {
-  const { authUser } = useContext(AuthContext)
+  const { authUser, isLoading } = useContext(AuthContext)
+
+  // Show loader while checking auth
+  if (isLoading) {
+    return <AppLoader />
+  }
+
   return (
     <ErrorBoundary>
-      <Toaster
-        position="top-right"
-        toastOptions={{
-          duration: 3000,
-          style: {
-            background: '#1a1a25',
-            color: '#e2e8f0',
-            border: '1px solid rgba(255,255,255,0.06)',
-            borderRadius: '12px',
-            fontSize: '14px',
-          },
-          success: { iconTheme: { primary: '#22c55e', secondary: '#1a1a25' } },
-          error: { iconTheme: { primary: '#ef4444', secondary: '#1a1a25' } },
-        }}
-      />
+      <Toaster position="top-right" toastOptions={TOAST_OPTIONS} />
       <Suspense fallback={<AppLoader />}>
         <Routes>
-          <Route path='/' element={authUser ? <HomePage /> : <Navigate to="/login" />} />
-          <Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to="/" />} />
-          <Route path='/profile' element={authUser ? <ProfilePage /> : <Navigate to="/login" />} />
+          <Route path='/' element={authUser ? <HomePage /> : <Navigate to="/login" replace />} />
+          <Route path='/login' element={!authUser ? <LoginPage /> : <Navigate to="/" replace />} />
+          <Route path='/profile' element={authUser ? <ProfilePage /> : <Navigate to="/login" replace />} />
           <Route path='/compare' element={<ChatAppsComparison />} />
-          <Route path='/admin' element={authUser ? <AdminDashboard /> : <Navigate to="/login" />} />
+          <Route path='/admin' element={authUser ? <AdminDashboard /> : <Navigate to="/login" replace />} />
+          <Route path='*' element={<Navigate to="/" replace />} />
         </Routes>
       </Suspense>
     </ErrorBoundary>

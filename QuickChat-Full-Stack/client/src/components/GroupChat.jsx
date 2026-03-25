@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useRef, useCallback, useMemo } from 'react'
-import { AuthContext } from '../../context/AuthContext'
-import { GroupContext } from '../../context/GroupContext'
+import { AuthContext } from '../context/AuthContext'
+import { GroupContext } from '../context/GroupContext'
 import { formatMessageTime } from '../lib/utils'
 import toast from 'react-hot-toast'
 

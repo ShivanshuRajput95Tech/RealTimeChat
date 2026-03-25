@@ -1,16 +1,10 @@
 import React, { useContext, useEffect, useState } from 'react'
-import { AuthContext } from '../../context/AuthContext'
-import { ChatContext } from '../../context/ChatContext'
-import { WorkspaceContext } from '../../context/WorkspaceContext'
-import { GroupContext } from '../../context/GroupContext'
+import { AuthContext } from '../context/AuthContext'
+import { ChatContext } from '../context/ChatContext'
+import { WorkspaceContext } from '../context/WorkspaceContext'
+import { GroupContext } from '../context/GroupContext'
 import MeetingsPanel from './MeetingsPanel'
-
-const STATUS_OPTIONS = [
-  { value: 'online', label: 'Online', color: 'status-online' },
-  { value: 'idle', label: 'Idle', color: 'status-idle' },
-  { value: 'dnd', label: 'Do Not Disturb', color: 'status-dnd' },
-  { value: 'offline', label: 'Invisible', color: 'status-offline' },
-]
+import { USER_STATUS_OPTIONS as STATUS_OPTIONS } from '../constants'
 
 const TextSidebar = ({ view, setView }) => {
   const { onlineUsers, authUser, changeStatus, userStatuses } = useContext(AuthContext)

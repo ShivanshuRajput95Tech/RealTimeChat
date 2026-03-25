@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react'
-import { AuthContext } from '../../context/AuthContext'
+import { AuthContext } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 
 const ScheduledMessagesPanel = ({ isOpen, onClose }) => {

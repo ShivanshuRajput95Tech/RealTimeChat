@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useContext, useCallback } from 'react'
-import { AuthContext } from '../../context/AuthContext'
+import { AuthContext } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 
 const ParticipantTile = ({ participant, isLocal, videoRef, isMuted, isVideoOff, isHost }) => {

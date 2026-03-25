@@ -1,8 +1,8 @@
 import React, { useContext, useState, useEffect, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChatContext } from '../../context/ChatContext'
-import { WorkspaceContext } from '../../context/WorkspaceContext'
-import { GroupContext } from '../../context/GroupContext'
+import { ChatContext } from '../context/ChatContext'
+import { WorkspaceContext } from '../context/WorkspaceContext'
+import { GroupContext } from '../context/GroupContext'
 
 const CommandPalette = ({ onClose, setView, onToggleAI, onOpenSearch, onOpenTemplates, onOpenNotes }) => {
   const [query, setQuery] = useState('')

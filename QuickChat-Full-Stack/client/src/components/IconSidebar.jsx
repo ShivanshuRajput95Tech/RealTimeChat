@@ -1,9 +1,9 @@
 import React, { useContext, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { AuthContext } from '../../context/AuthContext'
-import { ChatContext } from '../../context/ChatContext'
-import { WorkspaceContext } from '../../context/WorkspaceContext'
-import { GroupContext } from '../../context/GroupContext'
+import { AuthContext } from '../context/AuthContext'
+import { ChatContext } from '../context/ChatContext'
+import { WorkspaceContext } from '../context/WorkspaceContext'
+import { GroupContext } from '../context/GroupContext'
 
 const IconSidebar = ({ view, setView, onOpenCommandPalette, onToggleAI, showAI }) => {
   const { authUser, logout } = useContext(AuthContext)

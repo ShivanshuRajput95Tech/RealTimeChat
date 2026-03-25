@@ -1,6 +1,6 @@
 import React, { useState, useContext, useRef, useEffect, useCallback } from 'react'
-import { AIContext } from '../../context/AIContext'
-import { AuthContext } from '../../context/AuthContext'
+import { AIContext } from '../context/AIContext'
+import { AuthContext } from '../context/AuthContext'
 import toast from 'react-hot-toast'
 
 const QuickBotPanel = ({ channelId, groupId, conversationId, onClose }) => {

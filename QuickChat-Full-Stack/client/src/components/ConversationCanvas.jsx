@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState, useCallback, useRef } from 'react'
-import { AIContext } from '../../context/AIContext'
-import { WorkspaceContext } from '../../context/WorkspaceContext'
+import { AIContext } from '../context/AIContext'
+import { WorkspaceContext } from '../context/WorkspaceContext'
 
 const ConversationCanvas = ({ onClose }) => {
   const { getConversationCanvas, canvasData, isLoading } = useContext(AIContext)

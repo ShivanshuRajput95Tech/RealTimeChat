@@ -1,6 +1,6 @@
 import { useContext, useState, useRef, useEffect, useCallback } from 'react';
-import { AuthContext } from '../../context/AuthContext';
-import { ChatContext } from '../../context/ChatContext';
+import { AuthContext } from '../context/AuthContext';
+import { ChatContext } from '../context/ChatContext';
 import toast from 'react-hot-toast';
 
 export const useCallManager = () => {

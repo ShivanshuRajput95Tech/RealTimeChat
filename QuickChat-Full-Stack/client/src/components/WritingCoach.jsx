@@ -1,5 +1,5 @@
 import React, { useState, useContext, useCallback, useRef, useEffect } from 'react'
-import { AIContext } from '../../context/AIContext'
+import { AIContext } from '../context/AIContext'
 import { debounce } from '../lib/utils'
 
 const WritingCoach = ({ text, onApply, onClose }) => {
